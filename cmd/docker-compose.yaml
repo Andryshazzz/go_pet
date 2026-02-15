@@ -1,0 +1,15 @@
+service:
+  postgres:
+    image: postgres:15-alpine
+    containern_name: postgres_pet
+    environment:
+      POSTGRES_USER: pet
+      POSTGRES_PASSWORD: pet
+      POSTGRES_DB: pet
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
