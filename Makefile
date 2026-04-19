@@ -1,0 +1,53 @@
+include .env
+export
+
+export PROJECT_ROOT=$(shell pwd)
+
+
+env-up:
+	docker compose up -d postgres 
+
+env-down:
+	docker compose down postgres
+
+env-cleanup:
+	@read -p "Очистить все volume файлы окружения? [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		docker compose down postgres && \
+		rm -rf out/pgdata $$ \
+		echo "Готово"; \
+	else \
+		echo "Отменено"; \
+	fi
+
+migrate-create:
+	@if [ -z "$(seq)" ]; then \
+		echo "Отсутствует параметр seq. Пример: make migrate-create seq=init"; \
+		exit 1; \
+	fi;
+
+	docker compose run --rm postgres-migrate \
+		create \
+		-ext sql \
+		-dir /mirgations \
+		-seq "$(seq)"
+
+migrate-action:
+	docker compose run --rm postgres-migrate \
+		-path /mirgations \
+		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable \
+		"$(action)"
+	
+migrate-up:
+	make migrate-action action=up
+
+migrate-down:
+	make migrate-action action=down
+
+swagger-gen:
+	@docker compose run --rm swagger
+		init \
+		-g cmd/main.go \
+		-o docs \
+		--parseInternal \
+		--parseDependency

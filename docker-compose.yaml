@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:18.1-bookworm
+    container_name: postgres_pet
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql
+    restart: always
+
+  postgres-migrate:
+    image: migrate/migrate:v4.19.1
+    volumes:
+      - ${PROJECT_ROOT}/migrations:/mirgations
+    
+  swagger:
+    build: 
+      context: ${PROJECT_ROOT}
+      dockerfile_inline: |
+        FROM golang:1.24.1-alpine
+        RUN apk add --no-cache git
+        RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
+        WORKDIR /code
+        ENTRYPOINT ["swag"]
+    volumes:
+      - ${PROJECT_ROOT}:/code
+     
