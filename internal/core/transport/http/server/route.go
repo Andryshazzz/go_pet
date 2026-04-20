@@ -5,13 +5,13 @@ import "net/http"
 type Route struct {
 	Method  string
 	Path    string
-	Handler http.Handler
+	Handler http.HandlerFunc
 }
 
 func NewRoute(
 	method string,
 	path string,
-	handler http.Handler,
+	handler http.HandlerFunc,
 ) *Route {
 	return &Route{
 		Method:  method,

@@ -1,5 +1,11 @@
 package auth_transport_http
 
+import (
+	"net/http"
+
+	core_http_server "github.com/Andryshazzz/go_pet/internal/core/transport/http/server"
+)
+
 type UsersHTTPHandler struct {
 	usersService UsersService
 }
@@ -14,28 +20,12 @@ func NewUsersHTTPHandler(
 	}
 }
 
-// import (
-// 	"net/http"
-
-// 	"github.com/go-chi/chi/v5"
-// )
-
-// func RegisterPublicRoutes(r chi.Router) {
-// 	r.Route("/auth", func(r chi.Router) {
-// 		r.Post("/register", register)
-// 		r.Post("/login", login)
-// 		r.Post("/refresh", refresh)
-// 	})
-// }
-
-// func register(w http.ResponseWriter, r *http.Request) {
-// 	w.Write([]byte("register ok"))
-// }
-
-// func login(w http.ResponseWriter, r *http.Request) {
-// 	w.Write([]byte("login ok"))
-// }
-
-// func refresh(w http.ResponseWriter, r *http.Request) {
-// 	w.Write([]byte("refresh ok"))
-// }
+func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
+	return []core_http_server.Route{
+		{
+			Method:  http.MethodPost,
+			Path:    "/users",
+			Handler: h.CreateUser,
+		},
+	}
+}

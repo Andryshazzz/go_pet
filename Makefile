@@ -33,18 +33,20 @@ migrate-create:
 		-seq "$(seq)"
 
 migrate-action:
-	docker compose run --rm postgres-migrate \
+	@docker compose run --rm postgres-migrate \
 		-path /mirgations \
 		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable \
 		"$(action)"
 	
 migrate-up:
-	make migrate-action action=up
+	@make migrate-action action=up
 
 migrate-down:
-	make migrate-action action=down
+	@make migrate-action action=down
 
 app-run:
+	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	go mod tidy && \
 	go run cmd/main.go
 
 swagger-gen:
