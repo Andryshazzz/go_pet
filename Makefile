@@ -44,6 +44,9 @@ migrate-up:
 migrate-down:
 	make migrate-action action=down
 
+app-run:
+	go run cmd/main.go
+
 swagger-gen:
 	@docker compose run --rm swagger
 		init \

@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"go_pet/internal/core/config"
-	"go_pet/internal/core/http"
-	"go_pet/internal/core/postgres"
-	"go_pet/internal/feature/auth/transport"
 	"log"
 
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
+
+	"github.com/Andryshazzz/go_pet/internal/core/config"
+	"github.com/Andryshazzz/go_pet/internal/core/http"
+	"github.com/Andryshazzz/go_pet/internal/core/postgres"
 )
 
 // @title GO PET API
@@ -42,7 +42,7 @@ func main() {
 
 	r := chi.NewRouter()
 
-	transport.RegisterPublicRoutes(r)
+	// transport.RegisterPublicRoutes(r)
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
