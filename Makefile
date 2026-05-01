@@ -5,10 +5,10 @@ export PROJECT_ROOT=$(shell pwd)
 
 
 env-up:
-	docker compose up -d postgres 
+	@docker compose up -d postgres 
 
 env-down:
-	docker compose down postgres
+	@docker compose down postgres
 
 env-cleanup:
 	@read -p "Очистить все volume файлы окружения? [y/N]: " ans; \
@@ -19,6 +19,12 @@ env-cleanup:
 	else \
 		echo "Отменено"; \
 	fi
+
+env-port-forward:
+	@docker compose up -d port-forwarder
+
+env-port-close:
+	@docker compose down -d port-forwarder
 
 migrate-create:
 	@if [ -z "$(seq)" ]; then \
@@ -46,6 +52,7 @@ migrate-down:
 
 app-run:
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	export POSTGRES_HOST=localhost && \
 	go mod tidy && \
 	go run cmd/main.go
 

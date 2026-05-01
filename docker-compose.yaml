@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:18.1-bookworm
-    container_name: postgres_pet
+    container_name: postgres-pet
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -14,9 +14,16 @@ services:
     image: migrate/migrate:v4.19.1
     volumes:
       - ${PROJECT_ROOT}/migrations:/mirgations
-    
+
+  port-forwarder:
+    image: alpine/socat:1.8.0.3
+    container_name: postgres-pet-port-forwarder
+    command: tcp-listen:5432,fork,reuseaddr tcp-connect:postgres:5432
+    ports:
+      - "127.0.0.1:5432:5432"
+
   swagger:
-    build: 
+    build:
       context: ${PROJECT_ROOT}
       dockerfile_inline: |
         FROM golang:1.24.1-alpine
@@ -26,4 +33,3 @@ services:
         ENTRYPOINT ["swag"]
     volumes:
       - ${PROJECT_ROOT}:/code
-     
