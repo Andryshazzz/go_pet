@@ -56,6 +56,15 @@ app-run:
 	go mod tidy && \
 	go run cmd/main.go
 
+app-deploy:
+	@docker compose up -d --build deploy-app
+
+app-undeploy:
+	@docker compose down deploy-app
+
+ps:
+	@docker compose ps
+
 swagger-gen:
 	@docker compose run --rm swagger
 		init \
