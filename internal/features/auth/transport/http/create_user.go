@@ -22,15 +22,15 @@ type CreateUserResponse struct {
 
 // CreateUser	godoc
 // @Summary  	Создать пользователя
-// @Description Создать нового пользователя в ситеме
+// @Description Создать нового пользователя в системе
 // @Tags 		Auth
 // @Accept  	json
 // @Produce 	json
 // @Param   	request body CreateUserRequest true "CreateUser тело запроса"
 // @Success 	201 {object} CreateUserResponse "Успешно созданный пользователь"
-// @Failure 	400 {object} core_http_response.ErrorsResponde "Bad request"
-// @Failure 	500 {object} core_http_response.ErrorsResponde "Internsl server error"
-// @Route 		/auth [post]
+// @Failure 	400 {object} core_http_response.ErrorsResponse "Bad request"
+// @Failure 	500 {object} core_http_response.ErrorsResponse "Internal server error"
+// @Router		/auth [post]
 func (h *UsersHTTPHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)

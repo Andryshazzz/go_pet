@@ -13,7 +13,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_TIMEOUT=${POSTGRES_TIMEOUT}
       - LOGGER_LEVEL=${LOGGER_LEVEL}
-      - LOGGER_LEVEL=/app/out/logs
     volumes:
       - ${PROJECT_ROOT}/out/logs:/app/out/logs
     ports:
@@ -34,14 +33,14 @@ services:
   postgres-migrate:
     image: migrate/migrate:v4.19.1
     volumes:
-      - ${PROJECT_ROOT}/migrations:/mirgations
+      - ${PROJECT_ROOT}/migrations:/migrations
 
   port-forwarder:
     image: alpine/socat:1.8.0.3
     container_name: postgres-pet-port-forwarder
     command: tcp-listen:5432,fork,reuseaddr tcp-connect:postgres:5432
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5433:5432"
 
   swagger:
     build:

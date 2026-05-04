@@ -77,7 +77,7 @@ func (h *HTTPResponseHandler) errorResponse(
 	err error,
 	msg string,
 ) {
-	response := ErrorsResponde{
+	response := ErrorsResponse{
 		Error:   err.Error(),
 		Message: msg,
 	}

@@ -1,6 +1,6 @@
 package core_http_response
 
-type ErrorsResponde struct {
+type ErrorsResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
 }

@@ -35,13 +35,13 @@ migrate-create:
 	docker compose run --rm postgres-migrate \
 		create \
 		-ext sql \
-		-dir /mirgations \
+		-dir /migrations \
 		-seq "$(seq)"
 
 migrate-action:
 	@docker compose run --rm postgres-migrate \
-		-path /mirgations \
-		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable \
+		-path /migrations \
+		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5433/${POSTGRES_DB}?sslmode=disable \
 		"$(action)"
 	
 migrate-up:
@@ -53,6 +53,7 @@ migrate-down:
 app-run:
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
 	export POSTGRES_HOST=localhost && \
+	export POSTGRES_PORT=5433 && \
 	go mod tidy && \
 	go run cmd/main.go
 
