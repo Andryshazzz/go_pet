@@ -47,7 +47,7 @@ services:
     build:
       context: ${PROJECT_ROOT}
       dockerfile_inline: |
-        FROM golang:1.24.1-alpine
+        FROM golang:1.25.0-alpine
         RUN apk add --no-cache git
         RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
         WORKDIR /code

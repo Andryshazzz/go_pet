@@ -66,7 +66,7 @@ ps:
 	@docker compose ps
 
 swagger-gen:
-	@docker compose run --rm swagger
+	@docker compose run --rm swagger \
 		init \
 		-g cmd/main.go \
 		-o docs \

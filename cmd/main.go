@@ -15,8 +15,15 @@ import (
 	users_service "github.com/Andryshazzz/go_pet/internal/features/auth/service"
 	auth_transport_http "github.com/Andryshazzz/go_pet/internal/features/auth/transport/http"
 	"go.uber.org/zap"
+
+	_"github.com/Andryshazzz/go_pet/docs"
 )
 
+// @title        Golang app API
+// @version      1.0
+// @description  API for Golang app 
+// @host 		 127.0.0.1:5050
+// @BasePath 	 /api/v1
 func main() {
 	ctx, cancel := signal.NotifyContext(
 		context.Background(),
@@ -60,6 +67,8 @@ func main() {
 	apiVersionsRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
 	apiVersionsRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
 	httpServer.RegisterAPIRouters(apiVersionsRouter)
+
+	httpServer.RegisterSwagger()
 
 	if err := httpServer.Run(ctx); err != nil {
 		logger.Error("HTTP server run error", zap.Error(err))
