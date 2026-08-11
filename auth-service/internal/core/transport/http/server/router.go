@@ -1,23 +1,26 @@
-package core_http_server
+package httpserver
 
 import (
 	"fmt"
 	"net/http"
 )
 
+// ApiVersion.
 type ApiVersion string
 
 var (
-	ApiVersion1 = ApiVersion("1")
-	ApiVersion2 = ApiVersion("2")
-	ApiVersion3 = ApiVersion("3")
+	ApiVersion1 = ApiVersion("v1")
 )
 
+// APIVersionRouter is a versioned HTTP router that groups routes
+// under a specific API version prefix. It embeds http.ServeMux
+// and adds method-based routing support.
 type APIVersionRouter struct {
 	*http.ServeMux
 	apiVersion ApiVersion
 }
 
+// NewAPIVersionRouter creates a new router for the given API version.
 func NewAPIVersionRouter(apiVersion ApiVersion) *APIVersionRouter {
 	return &APIVersionRouter{
 		ServeMux:   http.NewServeMux(),
@@ -25,6 +28,7 @@ func NewAPIVersionRouter(apiVersion ApiVersion) *APIVersionRouter {
 	}
 }
 
+// RegisterRoutes registers one or more routes with this router.
 func (r *APIVersionRouter) RegisterRoutes(routes ...Route) {
 	for _, route := range routes {
 		pattern := fmt.Sprintf("%s %s", route.Method, route.Path)

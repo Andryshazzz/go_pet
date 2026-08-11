@@ -1,4 +1,4 @@
-package core_http_server
+package httpserver
 
 import (
 	"context"
@@ -7,31 +7,40 @@ import (
 	"net/http"
 
 	"github.com/Andryshazzz/go_pet/docs"
-	core_logger "github.com/Andryshazzz/go_pet/internal/core/logger"
-	core_http_middleware "github.com/Andryshazzz/go_pet/internal/core/transport/http/middleware"
-	"github.com/swaggo/http-swagger"
+	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
+	httpmiddleware "github.com/Andryshazzz/go_pet/internal/core/transport/http/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )
 
+// HTTPServer wraps the standard http.Server with middleware support,
+// API versioning, Swagger documentation, and graceful shutdown.
 type HTTPServer struct {
 	mux        *http.ServeMux
 	config     Config
-	log        *core_logger.Logger
-	middleware []core_http_middleware.Middleware
+	log        *logger.Logger
+	middleware []httpmiddleware.Middleware
 }
 
+// NewHTTPServer creates a new HTTPServer with the given configuration,
+// logger, and optional middleware chain.
+//
+// Middleware is applied in order to all registered routes.
 func NewHTTPServer(
 	config Config,
-	log *core_logger.Logger,
-	middleware ...core_http_middleware.Middleware,
+	log *logger.Logger,
+	middleware ...httpmiddleware.Middleware,
 ) *HTTPServer {
 	return &HTTPServer{
-		mux:    http.NewServeMux(),
-		config: config,
-		log:    log,
+		mux:        http.NewServeMux(),
+		config:     config,
+		log:        log,
+		middleware: middleware,
 	}
 }
 
+// RegisterAPIRouters registers versioned API routers under the /api/{version} prefix.
+// Each router handles its own set of routes.
 func (h *HTTPServer) RegisterAPIRouters(routers ...*APIVersionRouter) {
 	for _, router := range routers {
 		prefix := "/api/" + string(router.apiVersion)
@@ -43,7 +52,18 @@ func (h *HTTPServer) RegisterAPIRouters(routers ...*APIVersionRouter) {
 	}
 }
 
+// RegisterSwagger sets up Swagger UI and JSON spec endpoints.
+//
+// Endpoints:
+//   - GET /swagger/       — Swagger UI interface
+//   - GET /swagger/doc.json — OpenAPI JSON specification
 func (h *HTTPServer) RegisterSwagger() {
+	if docs.SwaggerInfo.ReadDoc() == "" {
+		h.log.Warn("Swagger documentation is empty, skipping registration")
+
+		return
+	}
+
 	h.mux.Handle(
 		"/swagger/",
 		httpSwagger.Handler(
@@ -54,15 +74,18 @@ func (h *HTTPServer) RegisterSwagger() {
 	h.mux.HandleFunc(
 		"/swagger/doc.json",
 		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("COntent-type", "application/json")
+			w.Header().Set("Content-type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(docs.SwaggerInfo.ReadDoc()))
 		},
 	)
 }
 
+// Run starts the HTTP server and blocks until the context is cancelled
+// or a fatal error occurs. On context cancellation, it performs a graceful
+// shutdown with the configured timeout.
 func (h *HTTPServer) Run(ctx context.Context) error {
-	mux := core_http_middleware.ChainMiddleware(h.mux, h.middleware...)
+	mux := httpmiddleware.ChainMiddleware(h.mux, h.middleware...)
 
 	server := &http.Server{
 		Addr:    h.config.Addr,
@@ -74,7 +97,7 @@ func (h *HTTPServer) Run(ctx context.Context) error {
 	go func() {
 		defer close(ch)
 
-		h.log.Debug("start HTTP server", zap.String("Addr", h.config.Addr))
+		h.log.Debug("Start HTTP server", zap.String("Addr", h.config.Addr))
 
 		err := server.ListenAndServe()
 
@@ -86,24 +109,27 @@ func (h *HTTPServer) Run(ctx context.Context) error {
 	select {
 	case err := <-ch:
 		if err != nil {
-			return fmt.Errorf("listen and server HTTP: %W", err)
+			return fmt.Errorf("Listen and server HTTP: %w", err)
 		}
 	case <-ctx.Done():
-		h.log.Warn("shutdowm HTTP server...")
+		h.log.Warn("Shutdown HTTP server...")
 
 		shutdownCtx, cancel := context.WithTimeout(
 			context.Background(),
 			h.config.ShutdownTimeout,
 		)
+
 		defer cancel()
 
 		if err := server.Shutdown(shutdownCtx); err != nil {
-			_ = server.Close()
+			if err := server.Close(); err != nil {
+				h.log.Error("Force close HTTP server", zap.Error(err))
+			}
 
-			return fmt.Errorf("shutdown HTTP server: %W", err)
+			return fmt.Errorf("Shutdown HTTP server: %w", err)
 		}
 
-		h.log.Warn("HTTP server stoped")
+		h.log.Warn("HTTP server stopped")
 	}
 
 	return nil

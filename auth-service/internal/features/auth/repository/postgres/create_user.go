@@ -1,4 +1,4 @@
-package users_postgres_repository
+package usersrepository
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"github.com/Andryshazzz/go_pet/internal/core/domain"
 )
 
+// CreateUser inserts a new user into the database and returns
+// the created user with the generated ID.
 func (r *UsersRepository) CreateUser(
 	ctx context.Context,
 	user domain.User,
@@ -15,7 +17,7 @@ func (r *UsersRepository) CreateUser(
 	defer cancel()
 
 	query := `
-	INSERT INTO myapp.users (full_name, phone_number)
+	INSERT INTO users (full_name, phone_number)
 	VALUES ($1, $2)
 	RETURNING id, full_name, phone_number;
 	`
@@ -23,11 +25,13 @@ func (r *UsersRepository) CreateUser(
 	row := r.pool.QueryRow(ctx, query, user.FullName, user.PhoneNumber)
 
 	var userModel UserModel
+
 	err := row.Scan(
 		&userModel.ID,
 		&userModel.FullName,
 		&userModel.PhoneNumber,
 	)
+
 	if err != nil {
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}

@@ -1,34 +1,27 @@
 include .env
 export
 
-export PROJECT_ROOT=$(shell pwd)
+export AUTH_SERVICE_ROOT=$(shell pwd)
 
-
-env-up:
+db-up:
 	@docker compose up -d postgres 
 
-env-down:
+db-down:
 	@docker compose down postgres
 
-env-cleanup:
-	@read -p "Очистить все volume файлы окружения? [y/N]: " ans; \
+db-cleanup:
+	@read -p "Clear all environment volume files? [y/N]: " ans; \
 	if [ "$$ans" = "y" ]; then \
 		docker compose down postgres && \
-		rm -rf out/pgdata $$ \
-		echo "Готово"; \
+		rm -rf out/pgdata && \
+		echo "Done"; \
 	else \
-		echo "Отменено"; \
+		echo "Cancelled"; \
 	fi
-
-env-port-forward:
-	@docker compose up -d port-forwarder
-
-env-port-close:
-	@docker compose down -d port-forwarder
 
 migrate-create:
 	@if [ -z "$(seq)" ]; then \
-		echo "Отсутствует параметр seq. Пример: make migrate-create seq=init"; \
+		echo "Missing seq parameter. Example: make migrate-create seq=init"; \
 		exit 1; \
 	fi;
 
@@ -41,7 +34,7 @@ migrate-create:
 migrate-action:
 	@docker compose run --rm postgres-migrate \
 		-path /migrations \
-		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5433/${POSTGRES_DB}?sslmode=disable \
+		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable \
 		"$(action)"
 	
 migrate-up:
@@ -51,7 +44,7 @@ migrate-down:
 	@make migrate-action action=down
 
 app-run:
-	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	@export LOGGER_FOLDER=${AUTH_SERVICE_ROOT}/out/logs && \
 	export POSTGRES_HOST=localhost && \
 	export POSTGRES_PORT=5433 && \
 	go mod tidy && \

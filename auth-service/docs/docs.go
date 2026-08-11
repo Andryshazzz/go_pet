@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth": {
+        "/users": {
             "post": {
                 "description": "Создать нового пользователя в системе",
                 "consumes": [
@@ -67,9 +67,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "description": "Error contains the technical error details for debugging.",
                     "type": "string"
                 },
                 "message": {
+                    "description": "Message contains the human-readable error description.",
                     "type": "string"
                 }
             }
@@ -83,7 +85,7 @@ const docTemplate = `{
                 "full_name": {
                     "type": "string",
                     "maxLength": 100,
-                    "minLength": 3,
+                    "minLength": 2,
                     "example": "Ivan Ivanov"
                 },
                 "phone_number": {
@@ -101,7 +103,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "phone_number": {
                     "type": "string"

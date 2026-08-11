@@ -7,21 +7,21 @@ import (
 	"os/signal"
 	"syscall"
 
-	core_logger "github.com/Andryshazzz/go_pet/internal/core/logger"
-	core_postgres_pool "github.com/Andryshazzz/go_pet/internal/core/repository/postgres/pool"
-	core_http_middleware "github.com/Andryshazzz/go_pet/internal/core/transport/http/middleware"
-	core_http_server "github.com/Andryshazzz/go_pet/internal/core/transport/http/server"
-	users_postgres_repository "github.com/Andryshazzz/go_pet/internal/features/auth/repository/postgres"
-	users_service "github.com/Andryshazzz/go_pet/internal/features/auth/service"
-	auth_transport_http "github.com/Andryshazzz/go_pet/internal/features/auth/transport/http"
+	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
+	postgrespool "github.com/Andryshazzz/go_pet/internal/core/repository/postgres/pool"
+	httpmiddleware "github.com/Andryshazzz/go_pet/internal/core/transport/http/middleware"
+	httpserver "github.com/Andryshazzz/go_pet/internal/core/transport/http/server"
+	usersrepository "github.com/Andryshazzz/go_pet/internal/features/auth/repository/postgres"
+	usersservice "github.com/Andryshazzz/go_pet/internal/features/auth/service"
+	authtransport "github.com/Andryshazzz/go_pet/internal/features/auth/transport/http"
 	"go.uber.org/zap"
 
-	_"github.com/Andryshazzz/go_pet/docs"
+	_ "github.com/Andryshazzz/go_pet/docs"
 )
 
 // @title        Golang app API
 // @version      1.0
-// @description  API for Golang app 
+// @description  API for Golang app
 // @host 		 127.0.0.1:5050
 // @BasePath 	 /api/v1
 func main() {
@@ -29,44 +29,53 @@ func main() {
 		context.Background(),
 		syscall.SIGINT, syscall.SIGTERM,
 	)
+
 	defer cancel()
 
-	logger, err := core_logger.NewLogger(core_logger.NewConfigMust())
+	logger, err := logger.NewLogger(logger.NewConfigMust())
+
 	if err != nil {
-		fmt.Println("failed to init application logger:", err)
+		fmt.Println("Failed to init application logger:", err)
+
 		os.Exit(1)
 	}
+
 	defer logger.Close()
 
-	logger.Debug("start init app")
-	pool, err := core_postgres_pool.NewConnectionPool(
+	logger.Debug("Start init app")
+
+	pool, err := postgrespool.NewConnectionPool(
 		ctx,
-		core_postgres_pool.NewConfigMust(),
+		postgrespool.NewConfigMust(),
 	)
+
 	if err != nil {
 		logger.Fatal("failed to init postgres connection pool", zap.Error(err))
 	}
+
 	defer pool.Close()
 
 	logger.Debug("Starting Application")
 
-	usersrepository := users_postgres_repository.NewUsersRepository(pool)
-	usersService := users_service.NewUsersService(usersrepository)
-	usersTransportHTTP := auth_transport_http.NewUsersHTTPHandler(usersService)
+	usersrepository := usersrepository.NewUsersRepository(pool)
+	usersService := usersservice.NewUsersService(usersrepository)
+	usersTransportHTTP := authtransport.NewUsersHTTPHandler(usersService)
 
 	logger.Debug("init HTTP server")
 
-	httpServer := core_http_server.NewHTTPServer(
-		core_http_server.NewConfigMust(),
+	httpServer := httpserver.NewHTTPServer(
+		httpserver.NewConfigMust(),
 		logger,
-		core_http_middleware.CORS(),
-		core_http_middleware.RequestID(),
-		core_http_middleware.Logger(logger),
-		core_http_middleware.Panic(),
-		core_http_middleware.Trace(),
+		httpmiddleware.CORS(),
+		httpmiddleware.RequestID(),
+		httpmiddleware.Logger(logger),
+		httpmiddleware.Panic(),
+		httpmiddleware.Trace(),
 	)
-	apiVersionsRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
+	
+	apiVersionsRouter := httpserver.NewAPIVersionRouter(httpserver.ApiVersion1)
 	apiVersionsRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
+
 	httpServer.RegisterAPIRouters(apiVersionsRouter)
 
 	httpServer.RegisterSwagger()

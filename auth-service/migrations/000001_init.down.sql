@@ -1,2 +1,1 @@
-DROP TABLE myapp.users;
-DROP SCHEMA myapp;
+DROP TABLE IF EXISTS users;

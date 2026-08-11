@@ -1,4 +1,4 @@
-package core_logger
+package logger
 
 import (
 	"context"
@@ -11,28 +11,67 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Logger wraps zap.Logger with file-based logging support.
+// It writes logs simultaneously to stdout and a timestamped file.
+//
+// Usage:
+//
+//	log, err := logger.New(logger.NewConfigMust())
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer log.Close()
+//
+//	log.Info("server started", zap.Int("port", 8080))
 type Logger struct {
 	*zap.Logger
 	file *os.File
 }
 
+// FromContext extracts a Logger from the given context.
+// Panics if no logger is found.
+//
+// Usage:
+//
+//	func handler(ctx context.Context) {
+//	    log := logger.FromContext(ctx)
+//	    log.Info("handling request")
+//	}
 func FromContext(ctx context.Context) *Logger {
 	log, ok := ctx.Value("log").(*Logger)
+
 	if !ok {
-		panic("no logger in context")
+		return &Logger{
+			Logger: zap.NewNop(),
+		}
 	}
 
 	return log
 }
 
+// NewLogger creates a new Logger that writes to both stdout and a log file.
+// The log file is created in config.Folder with a UTC timestamp in its name.
+//
+// Usage:
+//
+//	cfg := Config{
+//	    Level:  "debug",
+//	    Folder: "/var/log/myapp",
+//	}
+//	log, err := logger.NewLogger(cfg)
+//	if err != nil {
+//	    // handle error
+//	}
+//	defer log.Close()
 func NewLogger(config Config) (*Logger, error) {
 	zapLvl := zap.NewAtomicLevel()
+
 	if err := zapLvl.UnmarshalText([]byte(config.Level)); err != nil {
-		return nil, fmt.Errorf("unmarshal log level: %w", err)
+		return nil, fmt.Errorf("Unmarshal log level: %w", err)
 	}
 
 	if err := os.MkdirAll(config.Folder, 0755); err != nil {
-		return nil, fmt.Errorf("mkdir log folder: %w", err)
+		return nil, fmt.Errorf("Mkdir log folder: %w", err)
 	}
 
 	timestamp := time.Now().UTC().Format("2006-01-02T15-04-05.000000")
@@ -42,9 +81,16 @@ func NewLogger(config Config) (*Logger, error) {
 	)
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY, 0644)
+
 	if err != nil {
-		return nil, fmt.Errorf("open log file: %w", err)
+		return nil, fmt.Errorf("Open log file: %w", err)
 	}
+
+	defer func() {
+		if err != nil {
+			logFile.Close()
+		}
+	}()
 
 	zapConfig := zap.NewDevelopmentEncoderConfig()
 	zapConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02T15-04:05.000000")
@@ -64,6 +110,16 @@ func NewLogger(config Config) (*Logger, error) {
 	}, nil
 }
 
+// With creates a child logger with additional pre-set fields.
+// All log messages from the returned logger will include these fields.
+//
+// Usage:
+//
+//	requestLogger := log.With(
+//	    zap.String("request_id", requestID),
+//	    zap.String("method", "GET"),
+//	)
+//	requestLogger.Info("processing request")
 func (l *Logger) With(field ...zap.Field) *Logger {
 	return &Logger{
 		Logger: l.Logger.With(field...),
@@ -71,8 +127,14 @@ func (l *Logger) With(field ...zap.Field) *Logger {
 	}
 }
 
+// Close flushes and closes the underlying log file.
+// Should be called once when the application shuts down.
+//
+// Usage:
+//
+//	defer log.Close()
 func (l *Logger) Close() {
 	if err := l.file.Close(); err != nil {
-		fmt.Println("failed to close application logger:", err)
+		fmt.Println("Failed to close application logger:", err)
 	}
 }

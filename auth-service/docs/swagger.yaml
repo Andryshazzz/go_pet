@@ -3,8 +3,10 @@ definitions:
   github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse:
     properties:
       error:
+        description: Error contains the technical error details for debugging.
         type: string
       message:
+        description: Message contains the human-readable error description.
         type: string
     type: object
   internal_features_auth_transport_http.CreateUserRequest:
@@ -12,7 +14,7 @@ definitions:
       full_name:
         example: Ivan Ivanov
         maxLength: 100
-        minLength: 3
+        minLength: 2
         type: string
       phone_number:
         example: "+79991118899"
@@ -27,7 +29,7 @@ definitions:
       full_name:
         type: string
       id:
-        type: integer
+        type: string
       phone_number:
         type: string
     type: object
@@ -38,7 +40,7 @@ info:
   title: Golang app API
   version: "1.0"
 paths:
-  /auth:
+  /users:
     post:
       consumes:
       - application/json

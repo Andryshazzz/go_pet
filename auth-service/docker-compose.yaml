@@ -1,9 +1,9 @@
 services:
   deploy-app:
     build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/cmd/Dockerfile
-    container_name: app
+      context: ${AUTH_SERVICE_ROOT}
+      dockerfile: ${AUTH_SERVICE_ROOT}/Dockerfile
+    container_name: auth-service
     environment:
       - HTTP_ADDR=:5050
       - HTTP_SHUTDOWN_TIMEOUT=${HTTP_SHUTDOWN_TIMEOUT}
@@ -14,37 +14,32 @@ services:
       - POSTGRES_TIMEOUT=${POSTGRES_TIMEOUT}
       - LOGGER_LEVEL=${LOGGER_LEVEL}
     volumes:
-      - ${PROJECT_ROOT}/out/logs:/app/out/logs
+      - ${AUTH_SERVICE_ROOT}/out/logs:/app/out/logs
     ports:
       - "5050:5050"
     restart: always
 
   postgres:
-    image: postgres:18.1-bookworm
-    container_name: postgres-pet
+    image: postgres:16-bookworm
+    container_name: auth-service-db
+    ports:
+      - "5433:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      - ${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql
+      - ${AUTH_SERVICE_ROOT}/out/pgdata:/var/lib/postgresql/data
     restart: always
 
   postgres-migrate:
     image: migrate/migrate:v4.19.1
     volumes:
-      - ${PROJECT_ROOT}/migrations:/migrations
-
-  port-forwarder:
-    image: alpine/socat:1.8.0.3
-    container_name: postgres-pet-port-forwarder
-    command: tcp-listen:5432,fork,reuseaddr tcp-connect:postgres:5432
-    ports:
-      - "5433:5432"
+      - ${AUTH_SERVICE_ROOT}/migrations:/migrations
 
   swagger:
     build:
-      context: ${PROJECT_ROOT}
+      context: ${AUTH_SERVICE_ROOT}
       dockerfile_inline: |
         FROM golang:1.25.0-alpine
         RUN apk add --no-cache git
@@ -52,4 +47,4 @@ services:
         WORKDIR /code
         ENTRYPOINT ["swag"]
     volumes:
-      - ${PROJECT_ROOT}:/code
+      - ${AUTH_SERVICE_ROOT}:/code
