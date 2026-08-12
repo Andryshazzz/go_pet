@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/users": {
+        "/auth/login": {
             "post": {
-                "description": "Создать нового пользователя в системе",
+                "description": "Login with phone number and password.\nReturns user data and JWT token pair (access + refresh).",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,27 +27,91 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Создать пользователя",
+                "summary": "Login user",
                 "parameters": [
                     {
-                        "description": "CreateUser тело запроса",
+                        "description": "Login request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.CreateUserRequest"
+                            "$ref": "#/definitions/internal_features_auth_transport_http.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged in",
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Register with phone number, password, and full name.\nReturns user data and JWT token pair (access + refresh).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "Registration request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.RegisterRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Успешно созданный пользователь",
+                        "description": "Successfully registered",
                         "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.CreateUserResponse"
+                            "$ref": "#/definitions/internal_features_auth_transport_http.RegisterResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Phone already registered",
                         "schema": {
                             "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
                         }
@@ -76,10 +140,64 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_features_auth_transport_http.CreateUserRequest": {
+        "github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse": {
+            "type": "object",
+            "properties": {
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.LoginRequest": {
             "type": "object",
             "required": [
-                "full_name"
+                "password",
+                "phone_number"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "securePassword123"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 10,
+                    "example": "+79991112233"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "full_name",
+                "password",
+                "phone_number"
             ],
             "properties": {
                 "full_name": {
@@ -88,15 +206,38 @@ const docTemplate = `{
                     "minLength": 2,
                     "example": "Ivan Ivanov"
                 },
+                "password": {
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "securePassword123"
+                },
                 "phone_number": {
                     "type": "string",
                     "maxLength": 15,
                     "minLength": 10,
-                    "example": "+79991118899"
+                    "example": "+79991112233"
                 }
             }
         },
-        "internal_features_auth_transport_http.CreateUserResponse": {
+        "internal_features_auth_transport_http.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/internal_features_auth_transport_http.UserResponse"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.UserResponse": {
             "type": "object",
             "properties": {
                 "full_name": {

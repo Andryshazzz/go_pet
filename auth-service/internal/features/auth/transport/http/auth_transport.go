@@ -4,18 +4,14 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Andryshazzz/go_pet/internal/core/domain"
 	httpserver "github.com/Andryshazzz/go_pet/internal/core/transport/http/server"
+	usersservice "github.com/Andryshazzz/go_pet/internal/features/auth/service"
 )
 
 // UsersService defines the interface for user business logic operations.
 type UsersService interface {
-	// CreateUser persists a new user and returns the created user with
-	// any server-generated fields populated.
-	CreateUser(
-		ctx context.Context,
-		user domain.User,
-	) (domain.User, error)
+	Register(ctx context.Context, req usersservice.RegisterUserRequest) (*usersservice.RegisterUserResponse, error)
+	Login(ctx context.Context, req usersservice.LoginUserRequest) (*usersservice.LoginUserResponse, error)
 }
 
 // UsersHTTPHandler handles HTTP requests for user-related endpoints.
@@ -32,17 +28,18 @@ func NewUsersHTTPHandler(
 	}
 }
 
-// Routes returns the HTTP route definitions for user endpoints.
-// These routes are registered with the API version router in main.
-//
-// Endpoints:
-//   - POST /users — create a new user
+// PublicRoutes returns routes that don't require authentication.
 func (h *UsersHTTPHandler) Routes() []httpserver.Route {
 	return []httpserver.Route{
 		{
 			Method:  http.MethodPost,
-			Path:    "/users",
-			Handler: h.CreateUser,
+			Path:    "/auth/register",
+			Handler: h.Register,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/auth/login",
+			Handler: h.Login,
 		},
 	}
 }

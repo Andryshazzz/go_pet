@@ -3,11 +3,13 @@ package usersrepository
 // UserModel represents the users table row in the database.
 //
 // Fields:
-//   - ID: unique identifier (UUID stored as text/UUID type in PostgreSQL)
+//   - ID: unique identifier (UUID)
+//   - PhoneNumber: phone number used as login (UNIQUE, NOT NULL)
+//   - PasswordHash: bcrypt hash of the password (NOT NULL)
 //   - FullName: user's full name (NOT NULL)
-//   - PhoneNumber: user's phone number (NULLABLE)
 type UserModel struct {
-	ID          string  `db:"id"`
-	FullName    string  `db:"full_name"`
-	PhoneNumber *string `db:"phone_number"`
+	ID           string `db:"id"`
+	PhoneNumber  string `db:"phone_number"`
+	PasswordHash string `db:"password_hash"`
+	FullName     string `db:"full_name"`
 }

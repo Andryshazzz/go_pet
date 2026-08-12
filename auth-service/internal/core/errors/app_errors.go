@@ -15,4 +15,8 @@ var (
 	// ErrConflict indicates a resource already exists or a version conflict.
 	// Used when creating a resource that violates a uniqueness constraint.
 	ErrConflict = errors.New("conflict")
+
+	// ErrUnauthorized indicates that authentication is required or failed.
+	// Used when credentials are missing, invalid, or expired.
+	ErrUnauthorized = errors.New("unauthorized")
 )

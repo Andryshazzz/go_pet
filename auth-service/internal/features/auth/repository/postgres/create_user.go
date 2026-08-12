@@ -17,30 +17,34 @@ func (r *UsersRepository) CreateUser(
 	defer cancel()
 
 	query := `
-	INSERT INTO users (full_name, phone_number)
-	VALUES ($1, $2)
-	RETURNING id, full_name, phone_number;
+		INSERT INTO users (phone_number, password_hash, full_name)
+		VALUES ($1, $2, $3)
+		RETURNING id, phone_number, password_hash, full_name;
 	`
 
-	row := r.pool.QueryRow(ctx, query, user.FullName, user.PhoneNumber)
+	row := r.pool.QueryRow(ctx, query,
+		user.PhoneNumber,
+		user.PasswordHash,
+		user.FullName,
+	)
 
 	var userModel UserModel
 
 	err := row.Scan(
 		&userModel.ID,
-		&userModel.FullName,
 		&userModel.PhoneNumber,
+		&userModel.PasswordHash,
+		&userModel.FullName,
 	)
 
 	if err != nil {
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	userDomain := domain.NewUser(
+	return domain.NewUser(
 		userModel.ID,
+		userModel.PhoneNumber,
+		userModel.PasswordHash,
 		userModel.FullName,
-		user.PhoneNumber,
-	)
-
-	return userDomain, nil
+	), nil
 }

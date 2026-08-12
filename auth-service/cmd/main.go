@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Andryshazzz/go_pet/internal/core/config"
 	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
 	postgrespool "github.com/Andryshazzz/go_pet/internal/core/repository/postgres/pool"
 	httpmiddleware "github.com/Andryshazzz/go_pet/internal/core/transport/http/middleware"
@@ -55,10 +56,18 @@ func main() {
 
 	defer pool.Close()
 
+	jwtConfig := config.NewJWTConfigMust()
+
+	jwtService := usersservice.NewJWTService(
+		jwtConfig.Secret,
+		jwtConfig.AccessExpiration,
+		jwtConfig.RefreshExpiration,
+	)
+
 	logger.Debug("Starting Application")
 
 	usersrepository := usersrepository.NewUsersRepository(pool)
-	usersService := usersservice.NewUsersService(usersrepository)
+	usersService := usersservice.NewUsersService(usersrepository, jwtService)
 	usersTransportHTTP := authtransport.NewUsersHTTPHandler(usersService)
 
 	logger.Debug("init HTTP server")
@@ -72,7 +81,7 @@ func main() {
 		httpmiddleware.Panic(),
 		httpmiddleware.Trace(),
 	)
-	
+
 	apiVersionsRouter := httpserver.NewAPIVersionRouter(httpserver.ApiVersion1)
 	apiVersionsRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
 
