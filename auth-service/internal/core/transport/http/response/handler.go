@@ -1,4 +1,4 @@
-package core_http_response
+package httpresponse
 
 import (
 	"encoding/json"
@@ -6,23 +6,28 @@ import (
 	"fmt"
 	"net/http"
 
-	core_errors "github.com/Andryshazzz/go_pet/internal/core/errors"
-	core_logger "github.com/Andryshazzz/go_pet/internal/core/logger"
+	apperrors "github.com/Andryshazzz/go_pet/internal/core/errors"
+	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
 	"go.uber.org/zap"
 )
 
+// HTTPResponseHandler provides a convenient way to write HTTP responses
+// with proper error mapping, logging, and JSON encoding.
+
 type HTTPResponseHandler struct {
-	log *core_logger.Logger
+	log *logger.Logger
 	rw  http.ResponseWriter
 }
 
-func NewHTTPResponseHandler(log *core_logger.Logger, rw http.ResponseWriter) *HTTPResponseHandler {
+// NewHTTPResponseHandler creates a new HTTPResponseHandler.
+func NewHTTPResponseHandler(log *logger.Logger, rw http.ResponseWriter) *HTTPResponseHandler {
 	return &HTTPResponseHandler{
 		log: log,
 		rw:  rw,
 	}
 }
 
+// JSONResponse writes a JSON response with the given status code.
 func (h *HTTPResponseHandler) JSONResponse(
 	responseBody any,
 	statusCode int,
@@ -34,6 +39,14 @@ func (h *HTTPResponseHandler) JSONResponse(
 	}
 }
 
+// ErrorResponse maps an application error to an HTTP status code,
+// logs it at the appropriate level, and writes an error response.
+//
+// Error mapping:
+//   - ErrInvalidArgument → 400 (Warn log level)
+//   - ErrNotFound        → 404 (Debug log level)
+//   - ErrConflict        → 409 (Warn log level)
+//   - Other errors       → 500 (Error log level)
 func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 	var (
 		statusCode int
@@ -41,16 +54,20 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 	)
 
 	switch {
-	case errors.Is(err, core_errors.ErrInvalidArgument):
+	case errors.Is(err, apperrors.ErrInvalidArgument):
 		statusCode = http.StatusBadRequest
 		logFunc = h.log.Warn
 
-	case errors.Is(err, core_errors.ErrNotFounde):
+	case errors.Is(err, apperrors.ErrNotFound):
 		statusCode = http.StatusNotFound
 		logFunc = h.log.Debug
 
-	case errors.Is(err, core_errors.ErrConflict):
+	case errors.Is(err, apperrors.ErrConflict):
 		statusCode = http.StatusConflict
+		logFunc = h.log.Warn
+
+	case errors.Is(err, apperrors.ErrUnauthorized):
+		statusCode = http.StatusUnauthorized
 		logFunc = h.log.Warn
 
 	default:
@@ -63,15 +80,18 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 	h.errorResponse(statusCode, err, msg)
 }
 
+// PanicResponse handles recovered panics by logging them and returning
+// a 500 Internal Server Error response.
 func (h *HTTPResponseHandler) PanicResponse(p any, msg string) {
 	statusCode := http.StatusInternalServerError
-	err := fmt.Errorf("unexpected panic: %v", p)
+	err := fmt.Errorf("Unexpected panic: %v", p)
 
 	h.log.Error(msg, zap.Error(err))
 
 	h.errorResponse(statusCode, err, msg)
 }
 
+// errorResponse writes an ErrorsResponse as JSON with the given status code.
 func (h *HTTPResponseHandler) errorResponse(
 	statusCode int,
 	err error,

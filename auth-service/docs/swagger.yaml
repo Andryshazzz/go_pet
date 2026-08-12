@@ -3,31 +3,104 @@ definitions:
   github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse:
     properties:
       error:
+        description: Error contains the technical error details for debugging.
         type: string
       message:
+        description: Message contains the human-readable error description.
         type: string
     type: object
-  internal_features_auth_transport_http.CreateUserRequest:
+  github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: string
+      phone_number:
+        type: string
+    type: object
+  internal_features_auth_transport_http.LoginRequest:
+    properties:
+      password:
+        example: securePassword123
+        maxLength: 72
+        minLength: 8
+        type: string
+      phone_number:
+        example: "+79991112233"
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - password
+    - phone_number
+    type: object
+  internal_features_auth_transport_http.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse'
+    type: object
+  internal_features_auth_transport_http.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+    required:
+    - refresh_token
+    type: object
+  internal_features_auth_transport_http.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
+  internal_features_auth_transport_http.RegisterRequest:
     properties:
       full_name:
         example: Ivan Ivanov
         maxLength: 100
-        minLength: 3
+        minLength: 2
+        type: string
+      password:
+        example: securePassword123
+        maxLength: 72
+        minLength: 8
         type: string
       phone_number:
-        example: "+79991118899"
+        example: "+79991112233"
         maxLength: 15
         minLength: 10
         type: string
     required:
     - full_name
+    - password
+    - phone_number
     type: object
-  internal_features_auth_transport_http.CreateUserResponse:
+  internal_features_auth_transport_http.RegisterResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/internal_features_auth_transport_http.UserResponse'
+    type: object
+  internal_features_auth_transport_http.UserResponse:
     properties:
       full_name:
         type: string
       id:
-        type: integer
+        type: string
       phone_number:
         type: string
     type: object
@@ -38,34 +111,116 @@ info:
   title: Golang app API
   version: "1.0"
 paths:
-  /auth:
+  /auth/login:
     post:
       consumes:
       - application/json
-      description: Создать нового пользователя в системе
+      description: |-
+        Login with phone number and password.
+        Returns user data and JWT token pair (access + refresh).
       parameters:
-      - description: CreateUser тело запроса
+      - description: Login request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_features_auth_transport_http.CreateUserRequest'
+          $ref: '#/definitions/internal_features_auth_transport_http.LoginRequest'
       produces:
       - application/json
       responses:
-        "201":
-          description: Успешно созданный пользователь
+        "200":
+          description: Successfully logged in
           schema:
-            $ref: '#/definitions/internal_features_auth_transport_http.CreateUserResponse'
+            $ref: '#/definitions/internal_features_auth_transport_http.LoginResponse'
         "400":
           description: Bad request
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "404":
+          description: User not found
           schema:
             $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
-      summary: Создать пользователя
+      summary: Login user
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Use a valid refresh token to obtain a new access and refresh token pair.
+        The old refresh token becomes invalid after this operation.
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_auth_transport_http.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New token pair
+          schema:
+            $ref: '#/definitions/internal_features_auth_transport_http.RefreshTokenResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+      summary: Refresh access token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Register with phone number, password, and full name.
+        Returns user data and JWT token pair (access + refresh).
+      parameters:
+      - description: Registration request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_auth_transport_http.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully registered
+          schema:
+            $ref: '#/definitions/internal_features_auth_transport_http.RegisterResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "409":
+          description: Phone already registered
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+      summary: Register a new user
       tags:
       - Auth
 swagger: "2.0"
