@@ -73,6 +73,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Use a valid refresh token to obtain a new access and refresh token pair.\nThe old refresh token becomes invalid after this operation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New token pair",
+                        "schema": {
+                            "$ref": "#/definitions/internal_features_auth_transport_http.RefreshTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "Register with phone number, password, and full name.\nReturns user data and JWT token pair (access + refresh).",
@@ -189,6 +241,32 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse"
+                }
+            }
+        },
+        "internal_features_auth_transport_http.RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIs..."
+                }
+            }
+        },
+        "internal_features_auth_transport_http.RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
                 }
             }
         },

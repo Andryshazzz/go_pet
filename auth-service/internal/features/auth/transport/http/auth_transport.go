@@ -12,6 +12,7 @@ import (
 type UsersService interface {
 	Register(ctx context.Context, req usersservice.RegisterUserRequest) (*usersservice.RegisterUserResponse, error)
 	Login(ctx context.Context, req usersservice.LoginUserRequest) (*usersservice.LoginUserResponse, error)
+	RefreshToken(ctx context.Context, req usersservice.RefreshTokenRequest) (*usersservice.RefreshTokenResponse, error)
 }
 
 // UsersHTTPHandler handles HTTP requests for user-related endpoints.
@@ -40,6 +41,11 @@ func (h *UsersHTTPHandler) Routes() []httpserver.Route {
 			Method:  http.MethodPost,
 			Path:    "/auth/login",
 			Handler: h.Login,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/auth/refresh",
+			Handler: h.RefreshToken,
 		},
 	}
 }

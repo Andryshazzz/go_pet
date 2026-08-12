@@ -45,6 +45,23 @@ definitions:
       user:
         $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse'
     type: object
+  internal_features_auth_transport_http.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+    required:
+    - refresh_token
+    type: object
+  internal_features_auth_transport_http.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
   internal_features_auth_transport_http.RegisterRequest:
     properties:
       full_name:
@@ -132,6 +149,42 @@ paths:
           schema:
             $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
       summary: Login user
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Use a valid refresh token to obtain a new access and refresh token pair.
+        The old refresh token becomes invalid after this operation.
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_auth_transport_http.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New token pair
+          schema:
+            $ref: '#/definitions/internal_features_auth_transport_http.RefreshTokenResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse'
+      summary: Refresh access token
       tags:
       - Auth
   /auth/register:
