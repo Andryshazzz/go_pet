@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/Andryshazzz/go_pet/docs"
-	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
-	httpmiddleware "github.com/Andryshazzz/go_pet/internal/core/transport/http/middleware"
+	"github.com/Andryshazzz/go_pet/pkg/logger"
+	httpmiddleware "github.com/Andryshazzz/go_pet/pkg/transport/http/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )

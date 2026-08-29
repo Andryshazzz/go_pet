@@ -3,7 +3,7 @@ package usersservice
 import (
 	"context"
 
-	"github.com/Andryshazzz/go_pet/internal/core/domain"
+	"github.com/Andryshazzz/go_pet/pkg/domain"
 )
 
 // UsersRepository defines the interface for user persistence operations.

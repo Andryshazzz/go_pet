@@ -1,6 +1,6 @@
 package usersrepository
 
-import postgrespool "github.com/Andryshazzz/go_pet/internal/core/repository/postgres/pool"
+import postgrespool "github.com/Andryshazzz/go_pet/pkg/pool"
 
 // UsersRepository implements data access operations for users
 // using PostgreSQL as the storage backend.

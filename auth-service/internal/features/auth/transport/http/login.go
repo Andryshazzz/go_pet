@@ -3,10 +3,10 @@ package authtransport
 import (
 	"net/http"
 
-	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
-	httprequest "github.com/Andryshazzz/go_pet/internal/core/transport/http/request"
-	httpresponse "github.com/Andryshazzz/go_pet/internal/core/transport/http/response"
+	httprequest "github.com/Andryshazzz/go_pet/pkg/transport/http/request"
 	"github.com/Andryshazzz/go_pet/internal/features/auth/service"
+	logger "github.com/Andryshazzz/go_pet/pkg/logger"
+	httpresponse "github.com/Andryshazzz/go_pet/pkg/transport/http/response"
 )
 
 // LoginRequest represents the JSON body for user login.
@@ -18,9 +18,9 @@ type LoginRequest struct {
 // LoginResponse represents the JSON response after successful login.
 type LoginResponse struct {
 	User         usersservice.UserResponse `json:"user"`
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
-	ExpiresIn    int64        `json:"expires_in"`
+	AccessToken  string                    `json:"access_token"`
+	RefreshToken string                    `json:"refresh_token"`
+	ExpiresIn    int64                     `json:"expires_in"`
 }
 
 // Login godoc

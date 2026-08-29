@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Andryshazzz/go_pet/internal/core/domain"
-	apperrors "github.com/Andryshazzz/go_pet/internal/core/errors"
+	"github.com/Andryshazzz/go_pet/pkg/domain"
+	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 )
 
 // RegisterUserRequest contains the data needed for registration.

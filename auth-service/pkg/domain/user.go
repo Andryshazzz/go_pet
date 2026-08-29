@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	apperrors "github.com/Andryshazzz/go_pet/internal/core/errors"
+	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 )
 
 // UninitializedID is used for new users before they are persisted.

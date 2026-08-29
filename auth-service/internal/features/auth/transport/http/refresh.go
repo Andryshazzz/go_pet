@@ -3,9 +3,9 @@ package authtransport
 import (
 	"net/http"
 
-	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
-	httprequest "github.com/Andryshazzz/go_pet/internal/core/transport/http/request"
-	httpresponse "github.com/Andryshazzz/go_pet/internal/core/transport/http/response"
+	logger "github.com/Andryshazzz/go_pet/pkg/logger"
+	httprequest "github.com/Andryshazzz/go_pet/pkg/transport/http/request"
+	httpresponse "github.com/Andryshazzz/go_pet/pkg/transport/http/response"
 	"github.com/Andryshazzz/go_pet/internal/features/auth/service"
 )
 

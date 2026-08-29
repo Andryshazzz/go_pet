@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	apperrors "github.com/Andryshazzz/go_pet/internal/core/errors"
+	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 )
 
 // LoginUserRequest contains the credentials needed for authentication.

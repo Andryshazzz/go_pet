@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	core_logger "github.com/Andryshazzz/go_pet/internal/core/logger"
-	httpresponse "github.com/Andryshazzz/go_pet/internal/core/transport/http/response"
+	"github.com/Andryshazzz/go_pet/pkg/logger"
+	httpresponse "github.com/Andryshazzz/go_pet/pkg/transport/http/response"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -71,7 +71,7 @@ func RequestID() Middleware {
 
 // Logger returns a middleware that injects a request-scoped logger
 // into the request context. The logger includes the request ID and URL.
-func Logger(log *core_logger.Logger) Middleware {
+func Logger(log *logger.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			requestID := r.Header.Get(requestIDHeader)
@@ -97,7 +97,7 @@ func Panic() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			log := core_logger.FromContext(ctx)
+			log := logger.FromContext(ctx)
 			responseHandler := httpresponse.NewHTTPResponseHandler(log, w)
 
 			defer func() {
@@ -124,7 +124,7 @@ func Trace() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			log := core_logger.FromContext(ctx)
+			log := logger.FromContext(ctx)
 			rw := httpresponse.NewResponseWriter(w)
 
 			before := time.Now()

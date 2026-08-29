@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	apperrors "github.com/Andryshazzz/go_pet/internal/core/errors"
-	logger "github.com/Andryshazzz/go_pet/internal/core/logger"
+	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
+	"github.com/Andryshazzz/go_pet/pkg/logger"
 	"go.uber.org/zap"
 )
 

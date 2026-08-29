@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Andryshazzz/go_pet/internal/core/domain"
+	"github.com/Andryshazzz/go_pet/pkg/domain"
 	"github.com/jackc/pgx/v5"
 )
 

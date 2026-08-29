@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	apperrors "github.com/Andryshazzz/go_pet/internal/core/errors"
+	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 	"github.com/go-playground/validator"
 )
 

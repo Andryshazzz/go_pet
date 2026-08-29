@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Andryshazzz/go_pet/internal/core/domain"
+	"github.com/Andryshazzz/go_pet/pkg/domain"
 )
 
 // CreateUser inserts a new user into the database and returns
