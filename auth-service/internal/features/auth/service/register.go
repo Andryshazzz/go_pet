@@ -32,7 +32,7 @@ func (s *UsersService) Register(
 		return nil, fmt.Errorf("Check phone existence: %w", err)
 	}
 	if existingUser != nil {
-		return nil, fmt.Errorf("User with phone %s already exists: %w", req.PhoneNumber, apperrors.ErrConflict)
+		return nil, fmt.Errorf("User with phone %s already exists: %w", req.PhoneNumber, apperrors.ErrUserAlreadyExists)
 	}
 
 	passwordHash, err := hashPassword(req.Password)

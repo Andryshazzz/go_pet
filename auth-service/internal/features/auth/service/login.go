@@ -10,12 +10,12 @@ import (
 // LoginUserRequest contains the credentials needed for authentication.
 type LoginUserRequest struct {
 	PhoneNumber string
-	Password string
+	Password    string
 }
 
 // LoginUserResponse contains the result of successful authentication.
 type LoginUserResponse struct {
-	User UserResponse
+	User      UserResponse
 	TokenPair *TokenPair
 }
 
@@ -37,7 +37,7 @@ func (s *UsersService) Login(
 		return nil, fmt.Errorf("find user by phone: %w", err)
 	}
 	if user == nil {
-		return nil, fmt.Errorf("user with phone %s not found: %w", req.PhoneNumber, apperrors.ErrNotFound)
+		return nil, fmt.Errorf("user with phone %s not found: %w", req.PhoneNumber, apperrors.ErrNotFoundUser)
 	}
 
 	if !checkPassword(req.Password, user.PasswordHash) {

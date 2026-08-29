@@ -25,7 +25,7 @@ func (s *UsersService) RefreshToken(
 ) (*RefreshTokenResponse, error) {
 	claims, err := s.jwtService.ValidateToken(req.RefreshToken)
 	if err != nil {
-		return nil, fmt.Errorf("Invalid refresh token: %w: %w", err, apperrors.ErrUnauthorized)
+		return nil, fmt.Errorf("Invalid refresh token: %w: %w", err, apperrors.ErrInvalidArgument)
 	}
 
 	tokenPair, err := s.jwtService.GenerateTokenPair(claims.UserID, claims.PhoneNumber)

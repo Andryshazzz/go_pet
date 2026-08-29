@@ -55,18 +55,18 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 
 	switch {
 	case errors.Is(err, apperrors.ErrInvalidArgument):
-		statusCode = http.StatusBadRequest
+		statusCode = http.StatusUnprocessableEntity
 		logFunc = h.log.Warn
 
-	case errors.Is(err, apperrors.ErrNotFound):
+	case errors.Is(err, apperrors.ErrNotFoundUser):
 		statusCode = http.StatusNotFound
 		logFunc = h.log.Debug
 
-	case errors.Is(err, apperrors.ErrConflict):
+	case errors.Is(err, apperrors.ErrUserAlreadyExists):
 		statusCode = http.StatusConflict
 		logFunc = h.log.Warn
 
-	case errors.Is(err, apperrors.ErrUnauthorized):
+	case errors.Is(err, apperrors.ErrInvalidCredentials):
 		statusCode = http.StatusUnauthorized
 		logFunc = h.log.Warn
 

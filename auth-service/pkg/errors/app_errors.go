@@ -1,22 +1,52 @@
 package apperrors
 
-import "errors"
-
 // Common application errors used across all layers.
 var (
-	// ErrNotFound indicates that the requested resource does not exist.
-	// Used by repositories when a query returns no results.
-	ErrNotFound = errors.New("not found")
+	// ErrNotFoundUser indicates that the requested user does not exist.
+	ErrNotFoundUser = AppError{
+		HTTPCode: 404,
+		Code:     "user_not_found",
+		Message:  "user not found",
+		Details:  nil,
+	}
 
 	// ErrInvalidArgument indicates that the provided input is invalid.
-	// Used by domain validation and request decoding.
-	ErrInvalidArgument = errors.New("invalid argument")
+	ErrInvalidArgument = AppError{
+		HTTPCode: 422,
+		Code:     "invalid_argument",
+		Message:  "invalid argument provided",
+		Details:  nil,
+	}
 
-	// ErrConflict indicates a resource already exists or a version conflict.
-	// Used when creating a resource that violates a uniqueness constraint.
-	ErrConflict = errors.New("conflict")
+	// ErrUserAlreadyExists indicates that a user with the same phone number
+	// already exists in the system.
+	ErrUserAlreadyExists = AppError{
+		HTTPCode: 409,
+		Code:     "user_already_exists",
+		Message:  "user with this phone number already exists",
+		Details:  nil,
+	}
 
-	// ErrUnauthorized indicates that authentication is required or failed.
-	// Used when credentials are missing, invalid, or expired.
-	ErrUnauthorized = errors.New("unauthorized")
+	// ErrInvalidCredentials indicates that the provided phone number or password
+	// does not match any user in the system.
+	ErrInvalidCredentials = AppError{
+		HTTPCode: 401,
+		Code:     "invalid_credentials",
+		Message:  "invalid phone number or password",
+		Details:  nil,
+	}
 )
+
+// AppError struct.
+type AppError struct {
+	HTTPCode int
+	Code     string
+	Message  string
+	Details  map[string]any
+}
+
+// Error implements the error interface.
+// Returns the human-readable message.
+func (e AppError) Error() string {
+	return e.Message
+}
