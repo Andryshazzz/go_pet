@@ -3,10 +3,10 @@ package authtransport
 import (
 	"net/http"
 
-	httprequest "github.com/Andryshazzz/go_pet/pkg/transport/http/request"
 	"github.com/Andryshazzz/go_pet/internal/features/auth/service"
+	httprequest "github.com/Andryshazzz/go_pet/pkg/httpserver/request"
+	httpresponse "github.com/Andryshazzz/go_pet/pkg/httpserver/response"
 	logger "github.com/Andryshazzz/go_pet/pkg/logger"
-	httpresponse "github.com/Andryshazzz/go_pet/pkg/transport/http/response"
 )
 
 // LoginRequest represents the JSON body for user login.

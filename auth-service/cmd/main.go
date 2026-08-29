@@ -11,10 +11,10 @@ import (
 	usersservice "github.com/Andryshazzz/go_pet/internal/features/auth/service"
 	authtransport "github.com/Andryshazzz/go_pet/internal/features/auth/transport/http"
 	"github.com/Andryshazzz/go_pet/pkg/config"
+	postgrespool "github.com/Andryshazzz/go_pet/pkg/database/postgres/pool"
 	"github.com/Andryshazzz/go_pet/pkg/logger"
-	postgrespool "github.com/Andryshazzz/go_pet/pkg/pool"
-	httpmiddleware "github.com/Andryshazzz/go_pet/pkg/transport/http/middleware"
-	httpserver "github.com/Andryshazzz/go_pet/pkg/transport/http/server"
+	httpmiddleware "github.com/Andryshazzz/go_pet/pkg/httpserver/middleware"
+	httpserver "github.com/Andryshazzz/go_pet/pkg/httpserver/server"
 	"go.uber.org/zap"
 
 	_ "github.com/Andryshazzz/go_pet/docs"

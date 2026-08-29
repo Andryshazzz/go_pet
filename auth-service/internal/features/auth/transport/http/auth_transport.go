@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	usersservice "github.com/Andryshazzz/go_pet/internal/features/auth/service"
-	httpserver "github.com/Andryshazzz/go_pet/pkg/transport/http/server"
+	httpserver "github.com/Andryshazzz/go_pet/pkg/httpserver/server"
 )
 
 // UsersService defines the interface for user business logic operations.

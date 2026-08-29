@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Andryshazzz/go_pet/pkg/logger"
-	httpresponse "github.com/Andryshazzz/go_pet/pkg/transport/http/response"
+	httpresponse "github.com/Andryshazzz/go_pet/pkg/httpserver/response"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
