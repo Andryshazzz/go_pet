@@ -8,6 +8,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// Config holds JWT service settings.
+// Values are passed from the application configuration.
+type Config struct {
+	Secret            string
+	AccessExpiration  time.Duration
+	RefreshExpiration time.Duration
+}
+
 // JWTService handles JWT token generation and validation.
 type JWTService struct {
 	secret            string
@@ -18,7 +26,7 @@ type JWTService struct {
 // Claims represents the JWT claims for authenticated users.
 type Claims struct {
 	UserID      uuid.UUID `json:"user_id"`
-	PhoneNumber string `json:"phone_number"`
+	PhoneNumber string    `json:"phone_number"`
 	jwt.RegisteredClaims
 }
 
@@ -30,11 +38,11 @@ type TokenPair struct {
 }
 
 // NewJWTService creates a new JWTService.
-func NewJWTService(secret string, accessExp, refreshExp time.Duration) *JWTService {
+func NewJWTService(config Config) *JWTService {
 	return &JWTService{
-		secret:            secret,
-		accessExpiration:  accessExp,
-		refreshExpiration: refreshExp,
+		secret:            config.Secret,
+		accessExpiration:  config.AccessExpiration,
+		refreshExpiration: config.RefreshExpiration,
 	}
 }
 

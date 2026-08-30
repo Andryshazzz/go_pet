@@ -5,13 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Andryshazzz/go_pet/docs"
-	"github.com/Andryshazzz/go_pet/pkg/logger"
 	httpmiddleware "github.com/Andryshazzz/go_pet/pkg/httpserver/middleware"
+	"github.com/Andryshazzz/go_pet/pkg/logger"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )
+
+// Config holds the configuration for the HTTP server.
+// Values are passed from the application configuration.
+type Config struct {
+	Addr            string
+	ShutdownTimeout time.Duration
+}
 
 // HTTPServer wraps the standard http.Server with middleware support,
 // API versioning, Swagger documentation, and graceful shutdown.

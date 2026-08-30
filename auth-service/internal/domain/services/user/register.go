@@ -2,11 +2,12 @@ package usersservice
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	domain "github.com/Andryshazzz/go_pet/pkg/domain"
+	"github.com/Andryshazzz/go_pet/internal/domain/entity"
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
-	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
+	jwt "github.com/Andryshazzz/go_pet/pkg/jwt"
 )
 
 // RegisterUserRequest contains the data needed for registration.
@@ -18,7 +19,7 @@ type RegisterUserRequest struct {
 
 // RegisterUserResponse contains the result of successful registration.
 type RegisterUserResponse struct {
-	User      domain.User
+	User      entity.User
 	TokenPair *jwt.TokenPair
 }
 
@@ -30,18 +31,19 @@ func (s *UsersService) Register(
 ) (*RegisterUserResponse, error) {
 	existingUser, err := s.usersRepository.FindByPhone(ctx, req.PhoneNumber)
 	if err != nil {
-		return nil, fmt.Errorf("Check phone existence: %w", err)
-	}
-	if existingUser != nil {
-		return nil, fmt.Errorf("User with phone %s already exists: %w", req.PhoneNumber, apperrors.ErrUserAlreadyExists)
+		if !errors.Is(err, apperrors.ErrNotFoundUser) {
+			return nil, fmt.Errorf("check phone existence: %w", err)
+		}
+	} else if existingUser != nil {
+		return nil, fmt.Errorf("user with phone %s already exists: %w", req.PhoneNumber, apperrors.ErrUserAlreadyExists)
 	}
 
-	passwordHash, err := domain.HashPassword(req.Password)
+	passwordHash, err := HashPassword(req.Password)
 	if err != nil {
 		return nil, fmt.Errorf("Hash password: %w", err)
 	}
 
-	user := domain.NewUser(req.PhoneNumber, passwordHash, req.FullName)
+	user := entity.NewUser(req.PhoneNumber, passwordHash, req.FullName)
 	if err := user.Validate(); err != nil {
 		return nil, fmt.Errorf("Validate user: %w", err)
 	}

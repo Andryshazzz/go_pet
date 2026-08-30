@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 
-	domain "github.com/Andryshazzz/go_pet/pkg/domain"
-	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
+	jwt "github.com/Andryshazzz/go_pet/pkg/jwt"
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 )
 
@@ -43,7 +42,7 @@ func (s *UsersService) Login(
 		return nil, fmt.Errorf("user with phone %s not found: %w", req.PhoneNumber, apperrors.ErrNotFoundUser)
 	}
 
-	if !domain.CheckPassword(req.Password, user.PasswordHash) {
+	if !CheckPassword(req.Password, user.PasswordHash) {
 		return nil, fmt.Errorf("invalid password: %w", apperrors.ErrInvalidArgument)
 	}
 

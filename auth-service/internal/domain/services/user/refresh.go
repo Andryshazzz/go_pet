@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
-	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
+	jwt "github.com/Andryshazzz/go_pet/pkg/jwt"
 )
 
 // RefreshTokenRequest contains the refresh token for obtaining new tokens.

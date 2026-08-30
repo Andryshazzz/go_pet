@@ -27,6 +27,7 @@ go.work.sum
 # env file
 .env
 .env.docker
+main.yaml
 out
 
 # Editor/IDE

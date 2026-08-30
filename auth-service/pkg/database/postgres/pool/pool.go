@@ -10,6 +10,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Config holds the configuration for PostgreSQL connection pool.
+// Values are passed from the application configuration.
+type Config struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DB       string
+	Timeout  time.Duration
+}
+
 // Pool defines the interface for database operations.
 // It abstracts pgxpool.Pool to allow mocking in tests.
 //
@@ -92,7 +103,7 @@ func NewConnectionPool(
 		config.Password,
 		config.Host,
 		config.Port,
-		config.Database,
+		config.DB,
 	)
 
 	pgxconfig, err := pgxpool.ParseConfig(connectionString)
