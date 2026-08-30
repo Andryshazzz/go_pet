@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Andryshazzz/go_pet/pkg/domain"
+	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
 )
 
 // UsersRepository defines the interface for user persistence operations.
@@ -19,11 +20,11 @@ type UsersRepository interface {
 // UsersService contains business logic for user operations.
 type UsersService struct {
 	usersRepository UsersRepository
-	jwtService      *JWTService
+	jwtService      *jwt.JWTService
 }
 
 // NewUsersService creates a new UsersService with the given repository.
-func NewUsersService(usersRepository UsersRepository, jwtService *JWTService) *UsersService {
+func NewUsersService(usersRepository UsersRepository, jwtService *jwt.JWTService) *UsersService {
 	return &UsersService{
 		usersRepository: usersRepository,
 		jwtService:      jwtService,

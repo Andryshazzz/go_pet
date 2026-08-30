@@ -11,9 +11,9 @@ import (
 	usersservice "github.com/Andryshazzz/go_pet/internal/features/auth/service"
 	authtransport "github.com/Andryshazzz/go_pet/internal/features/auth/transport/http"
 	postgrespool "github.com/Andryshazzz/go_pet/pkg/database/postgres/pool"
+	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
 	httpmiddleware "github.com/Andryshazzz/go_pet/pkg/httpserver/middleware"
 	httpserver "github.com/Andryshazzz/go_pet/pkg/httpserver/server"
-	config "github.com/Andryshazzz/go_pet/pkg/jwt_config"
 	"github.com/Andryshazzz/go_pet/pkg/logger"
 	"go.uber.org/zap"
 
@@ -56,9 +56,9 @@ func main() {
 
 	defer pool.Close()
 
-	jwtConfig := config.NewJWTConfigMust()
+	jwtConfig := jwt.NewJWTConfigMust()
 
-	jwtService := usersservice.NewJWTService(
+	jwtService := jwt.NewJWTService(
 		jwtConfig.Secret,
 		jwtConfig.AccessExpiration,
 		jwtConfig.RefreshExpiration,

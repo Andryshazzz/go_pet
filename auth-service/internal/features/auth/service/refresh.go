@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
+	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
 )
 
 // RefreshTokenRequest contains the refresh token for obtaining new tokens.
@@ -14,7 +15,7 @@ type RefreshTokenRequest struct {
 
 // RefreshTokenResponse contains the new token pair.
 type RefreshTokenResponse struct {
-	TokenPair *TokenPair
+	TokenPair *jwt.TokenPair
 }
 
 // RefreshToken validates the refresh token and issues a new token pair.

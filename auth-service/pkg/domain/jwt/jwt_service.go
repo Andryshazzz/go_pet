@@ -1,4 +1,4 @@
-package usersservice
+package jwt
 
 import (
 	"fmt"

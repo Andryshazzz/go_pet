@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Andryshazzz/go_pet/pkg/domain"
+	domain "github.com/Andryshazzz/go_pet/pkg/domain"
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
+	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
 )
 
 // RegisterUserRequest contains the data needed for registration.
@@ -18,7 +19,7 @@ type RegisterUserRequest struct {
 // RegisterUserResponse contains the result of successful registration.
 type RegisterUserResponse struct {
 	User      domain.User
-	TokenPair *TokenPair
+	TokenPair *jwt.TokenPair
 }
 
 // Register creates a new user after validation and uniqueness check.
@@ -35,7 +36,7 @@ func (s *UsersService) Register(
 		return nil, fmt.Errorf("User with phone %s already exists: %w", req.PhoneNumber, apperrors.ErrUserAlreadyExists)
 	}
 
-	passwordHash, err := hashPassword(req.Password)
+	passwordHash, err := domain.HashPassword(req.Password)
 	if err != nil {
 		return nil, fmt.Errorf("Hash password: %w", err)
 	}

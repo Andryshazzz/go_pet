@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 
+	domain "github.com/Andryshazzz/go_pet/pkg/domain"
+	jwt "github.com/Andryshazzz/go_pet/pkg/domain/jwt"
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 )
 
@@ -17,7 +19,7 @@ type LoginUserRequest struct {
 // LoginUserResponse contains the result of successful authentication.
 type LoginUserResponse struct {
 	User      UserResponse
-	TokenPair *TokenPair
+	TokenPair *jwt.TokenPair
 }
 
 // UserResponse represents public user data returned to clients.
@@ -41,7 +43,7 @@ func (s *UsersService) Login(
 		return nil, fmt.Errorf("user with phone %s not found: %w", req.PhoneNumber, apperrors.ErrNotFoundUser)
 	}
 
-	if !checkPassword(req.Password, user.PasswordHash) {
+	if !domain.CheckPassword(req.Password, user.PasswordHash) {
 		return nil, fmt.Errorf("invalid password: %w", apperrors.ErrInvalidArgument)
 	}
 

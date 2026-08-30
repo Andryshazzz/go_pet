@@ -1,4 +1,4 @@
-package config
+package jwt
 
 import (
 	"fmt"
