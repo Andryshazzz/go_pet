@@ -3,6 +3,7 @@ package usersservice
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 
 	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 )
@@ -21,9 +22,9 @@ type LoginUserResponse struct {
 
 // UserResponse represents public user data returned to clients.
 type UserResponse struct {
-	ID          string `json:"id"`
-	PhoneNumber string `json:"phone_number"`
-	FullName    string `json:"full_name"`
+	ID          uuid.UUID `json:"id"`
+	PhoneNumber string    `json:"phone_number"`
+	FullName    string    `json:"full_name"`
 }
 
 // Login authenticates a user by phone number and password.

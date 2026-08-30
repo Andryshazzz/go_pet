@@ -18,17 +18,10 @@ type RegisterRequest struct {
 
 // RegisterResponse represents the JSON response after successful registration.
 type RegisterResponse struct {
-	User         UserResponse `json:"user"`
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
-	ExpiresIn    int64        `json:"expires_in"`
-}
-
-// UserResponse represents public user data (no password hash).
-type UserResponse struct {
-	ID          string `json:"id"`
-	PhoneNumber string `json:"phone_number"`
-	FullName    string `json:"full_name"`
+	User         UserDTO `json:"user"`
+	AccessToken  string  `json:"access_token"`
+	RefreshToken string  `json:"refresh_token"`
+	ExpiresIn    int64   `json:"expires_in"`
 }
 
 // Register godoc
@@ -68,7 +61,8 @@ func (h *UsersHTTPHandler) Register(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	response := RegisterResponse{
-		User: UserResponse{
+		User: UserDTO{
+			ID:          result.User.ID,
 			PhoneNumber: result.User.PhoneNumber,
 			FullName:    result.User.FullName,
 		},

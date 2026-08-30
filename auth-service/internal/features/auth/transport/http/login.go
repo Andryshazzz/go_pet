@@ -17,10 +17,10 @@ type LoginRequest struct {
 
 // LoginResponse represents the JSON response after successful login.
 type LoginResponse struct {
-	User         usersservice.UserResponse `json:"user"`
-	AccessToken  string                    `json:"access_token"`
-	RefreshToken string                    `json:"refresh_token"`
-	ExpiresIn    int64                     `json:"expires_in"`
+	User         UserDTO `json:"user"`
+	AccessToken  string  `json:"access_token"`
+	RefreshToken string  `json:"refresh_token"`
+	ExpiresIn    int64   `json:"expires_in"`
 }
 
 // Login godoc
@@ -58,7 +58,11 @@ func (h *UsersHTTPHandler) Login(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	response := LoginResponse{
-		User:         result.User,
+		User: UserDTO{
+			ID:          result.User.ID,
+			PhoneNumber: result.User.PhoneNumber,
+			FullName:    result.User.FullName,
+		},
 		AccessToken:  result.TokenPair.AccessToken,
 		RefreshToken: result.TokenPair.RefreshToken,
 		ExpiresIn:    result.TokenPair.ExpiresIn,
