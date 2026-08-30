@@ -40,7 +40,6 @@ func (r *UsersRepository) FindByPhone(
 	}
 
 	user := domain.NewUser(
-		userModel.ID,
 		userModel.PhoneNumber,
 		userModel.PasswordHash,
 		userModel.FullName,

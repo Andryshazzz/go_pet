@@ -2,6 +2,7 @@ package usersservice
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,7 +17,7 @@ type JWTService struct {
 
 // Claims represents the JWT claims for authenticated users.
 type Claims struct {
-	UserID      string `json:"user_id"`
+	UserID      uuid.UUID `json:"user_id"`
 	PhoneNumber string `json:"phone_number"`
 	jwt.RegisteredClaims
 }
@@ -38,7 +39,7 @@ func NewJWTService(secret string, accessExp, refreshExp time.Duration) *JWTServi
 }
 
 // GenerateTokenPair creates both access and refresh tokens for a user.
-func (s *JWTService) GenerateTokenPair(userID, phoneNumber string) (*TokenPair, error) {
+func (s *JWTService) GenerateTokenPair(userID uuid.UUID, phoneNumber string) (*TokenPair, error) {
 	accessToken, err := s.generateToken(userID, phoneNumber, s.accessExpiration)
 	if err != nil {
 		return nil, fmt.Errorf("Generate access token: %w", err)
@@ -79,7 +80,7 @@ func (s *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 }
 
 // generateToken creates a signed JWT token.
-func (s *JWTService) generateToken(userID, phoneNumber string, expiration time.Duration) (string, error) {
+func (s *JWTService) generateToken(userID uuid.UUID, phoneNumber string, expiration time.Duration) (string, error) {
 	claims := &Claims{
 		UserID:      userID,
 		PhoneNumber: phoneNumber,

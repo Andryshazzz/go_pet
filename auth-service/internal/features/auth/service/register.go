@@ -40,7 +40,7 @@ func (s *UsersService) Register(
 		return nil, fmt.Errorf("Hash password: %w", err)
 	}
 
-	user := domain.NewUninitializedUser(req.PhoneNumber, passwordHash, req.FullName)
+	user := domain.NewUser(req.PhoneNumber, passwordHash, req.FullName)
 	if err := user.Validate(); err != nil {
 		return nil, fmt.Errorf("Validate user: %w", err)
 	}

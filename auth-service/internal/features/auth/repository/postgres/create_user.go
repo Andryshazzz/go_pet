@@ -42,7 +42,6 @@ func (r *UsersRepository) CreateUser(
 	}
 
 	return domain.NewUser(
-		userModel.ID,
 		userModel.PhoneNumber,
 		userModel.PasswordHash,
 		userModel.FullName,

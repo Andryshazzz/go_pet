@@ -51,7 +51,6 @@ func (s *UsersService) Login(
 
 	return &LoginUserResponse{
 		User: UserResponse{
-			ID:          user.ID,
 			PhoneNumber: user.PhoneNumber,
 			FullName:    user.FullName,
 		},

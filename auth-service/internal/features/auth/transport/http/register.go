@@ -69,7 +69,6 @@ func (h *UsersHTTPHandler) Register(rw http.ResponseWriter, r *http.Request) {
 
 	response := RegisterResponse{
 		User: UserResponse{
-			ID:          result.User.ID,
 			PhoneNumber: result.User.PhoneNumber,
 			FullName:    result.User.FullName,
 		},
