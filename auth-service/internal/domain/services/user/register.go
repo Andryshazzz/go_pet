@@ -30,15 +30,15 @@ func (s *UsersService) Register(
 	req RegisterUserRequest,
 ) (*RegisterUserResponse, error) {
 	existingUser, err := s.usersRepository.FindByPhone(ctx, req.PhoneNumber)
-	if err != nil {
-		if !errors.Is(err, apperrors.ErrNotFoundUser) {
-			return nil, fmt.Errorf("check phone existence: %w", err)
-		}
-	} else if existingUser != nil {
+	if err != nil && !errors.Is(err, apperrors.ErrNotFoundUser) {
+		return nil, fmt.Errorf("check phone existence: %w", err)
+	}
+
+	if existingUser != nil {
 		return nil, fmt.Errorf("user with phone %s already exists: %w", req.PhoneNumber, apperrors.ErrUserAlreadyExists)
 	}
 
-	passwordHash, err := HashPassword(req.Password)
+	passwordHash, err := hashPassword(req.Password)
 	if err != nil {
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
@@ -48,17 +48,17 @@ func (s *UsersService) Register(
 		return nil, fmt.Errorf("validate user: %w", err)
 	}
 
-	createdUser, err := s.usersRepository.CreateUser(ctx, user)
-	if err != nil {
-		return nil, fmt.Errorf("create user: %w", err)
-	}
-
-	claims := entity.NewClaims(createdUser.ID, createdUser.PhoneNumber, s.jwtService.GetAccessExpiration())
+	claims := entity.NewClaims(user.ID, user.PhoneNumber, s.jwtService.GetAccessExpiration())
 	tokenPair, err := s.jwtService.GenerateTokenPair(claims)
 	if err != nil {
 		return nil, fmt.Errorf("generate tokens: %w", err)
 	}
 
+	createdUser, err := s.usersRepository.CreateUser(ctx, user)
+	if err != nil {
+		return nil, fmt.Errorf("create user: %w", err)
+	}
+	
 	return &RegisterUserResponse{
 		User:      createdUser,
 		TokenPair: tokenPair,

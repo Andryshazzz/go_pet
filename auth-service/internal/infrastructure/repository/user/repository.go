@@ -85,7 +85,7 @@ func (r *UsersRepository) FindByPhone(
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("user with phone %s: %w", phone, apperrors.ErrNotFoundUser)
+			return nil, fmt.Errorf("FindByPhone: %s: %w", phone, apperrors.ErrNotFoundUser)
 		}
 		return nil, fmt.Errorf("Find user by phone: %w", err)
 	}

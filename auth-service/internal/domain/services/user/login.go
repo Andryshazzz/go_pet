@@ -37,13 +37,14 @@ func (s *UsersService) Login(
 ) (*LoginUserResponse, error) {
 	user, err := s.usersRepository.FindByPhone(ctx, req.PhoneNumber)
 	if err != nil {
-		return nil, fmt.Errorf("find user by phone: %w", err)
+		return nil, err
 	}
+
 	if user == nil {
 		return nil, fmt.Errorf("user with phone %s not found: %w", req.PhoneNumber, apperrors.ErrNotFoundUser)
 	}
 
-	if !CheckPassword(req.Password, user.PasswordHash) {
+	if !checkPassword(req.Password, user.PasswordHash) {
 		return nil, fmt.Errorf("invalid password: %w", apperrors.ErrInvalidArgument)
 	}
 
