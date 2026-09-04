@@ -43,8 +43,6 @@ func (c *Container) Start(ctx context.Context) error {
 		return fmt.Errorf("init database: %w", err)
 	}
 
-	c.initJWT()
-	c.initLayers()
 	c.initHTTPServer()
 
 	return c.server.Run(ctx)
@@ -89,36 +87,104 @@ func (c *Container) initDatabase(ctx context.Context) error {
 	return nil
 }
 
-func (c *Container) initJWT() {
-	c.jwtService = jwt.NewJWTService(jwt.Config{
-		Secret:            c.cfg.JWT.Secret,
-		AccessExpiration:  c.cfg.JWT.AccessExpiration,
-		RefreshExpiration: c.cfg.JWT.RefreshExpiration,
-	})
+// getLogger returns the logger, creating it if necessary.
+func (c *Container) getLogger() *logger.Logger {
+	if c.logger == nil {
+		log, err := logger.NewLogger(logger.Config{
+			Level:  c.cfg.Logger.Level,
+			Folder: c.cfg.Logger.Folder,
+		})
+		if err != nil {
+			panic(fmt.Errorf("failed to create logger: %w", err))
+		}
+		c.logger = log
+	}
+	return c.logger
 }
 
-func (c *Container) initLayers() {
-	c.userRepository = usersrepository.NewUsersRepository(c.pool)
-	c.userService = usersservice.NewUsersService(c.userRepository, c.jwtService)
-	c.userHandler = auth.NewUsersHTTPHandler(c.userService)
+// getPool returns the database pool, creating it if necessary.
+func (c *Container) getPool() *postgrespool.ConnectionPool {
+	if c.pool == nil {
+		pool, err := postgrespool.NewConnectionPool(context.Background(), postgrespool.Config{
+			Host:     c.cfg.Postgres.Host,
+			Port:     c.cfg.Postgres.Port,
+			User:     c.cfg.Postgres.User,
+			Password: c.cfg.Postgres.Password,
+			DB:       c.cfg.Postgres.DB,
+			SSLMode:  c.cfg.Postgres.SSLMode,
+			Timeout:  c.cfg.Postgres.Timeout,
+		})
+		if err != nil {
+			panic(fmt.Errorf("failed to create database pool: %w", err))
+		}
+		c.pool = pool
+	}
+	return c.pool
+}
+
+// getJWTService returns the JWT service, creating it if necessary.
+func (c *Container) getJWTService() *jwt.JWTService {
+	if c.jwtService == nil {
+		c.jwtService = jwt.NewJWTService(jwt.Config{
+			Secret:            c.cfg.JWT.Secret,
+			AccessExpiration:  c.cfg.JWT.AccessExpiration,
+			RefreshExpiration: c.cfg.JWT.RefreshExpiration,
+		})
+	}
+	return c.jwtService
+}
+
+// getUserRepository returns the user repository, creating it if necessary.
+func (c *Container) getUserRepository() *usersrepository.UsersRepository {
+	if c.userRepository == nil {
+		c.userRepository = usersrepository.NewUsersRepository(c.getPool())
+	}
+	return c.userRepository
+}
+
+// getUserService returns the user service, creating it if necessary.
+func (c *Container) getUserService() *usersservice.UsersService {
+	if c.userService == nil {
+		c.userService = usersservice.NewUsersService(
+			c.getUserRepository(),
+			c.getJWTService(),
+		)
+	}
+	return c.userService
+}
+
+// getUserHandler returns the user handler, creating it if necessary.
+func (c *Container) getUserHandler() *auth.UsersHTTPHandler {
+	if c.userHandler == nil {
+		c.userHandler = auth.NewUsersHTTPHandler(c.getUserService())
+	}
+	return c.userHandler
+}
+
+// getHTTPServer returns the HTTP server, creating it if necessary.
+func (c *Container) getHTTPServer() *httpserver.HTTPServer {
+	if c.server == nil {
+		c.server = httpserver.NewHTTPServer(
+			httpserver.Config{
+				Addr:            c.cfg.HTTP.Addr,
+				ShutdownTimeout: c.cfg.HTTP.ShutdownTimeout,
+			},
+			c.getLogger(),
+			httpmiddleware.CORS(),
+			httpmiddleware.RequestID(),
+			httpmiddleware.Logger(c.getLogger()),
+			httpmiddleware.Panic(),
+			httpmiddleware.Trace(),
+		)
+
+		apiV1 := httpserver.NewAPIVersionRouter(httpserver.ApiVersion1)
+		apiV1.RegisterRoutes(c.getUserHandler().Routes()...)
+		c.server.RegisterAPIRouters(apiV1)
+		c.server.RegisterSwagger()
+	}
+	return c.server
 }
 
 func (c *Container) initHTTPServer() {
-	c.server = httpserver.NewHTTPServer(
-		httpserver.Config{
-			Addr:            c.cfg.HTTP.Addr,
-			ShutdownTimeout: c.cfg.HTTP.ShutdownTimeout,
-		},
-		c.logger,
-		httpmiddleware.CORS(),
-		httpmiddleware.RequestID(),
-		httpmiddleware.Logger(c.logger),
-		httpmiddleware.Panic(),
-		httpmiddleware.Trace(),
-	)
-
-	apiV1 := httpserver.NewAPIVersionRouter(httpserver.ApiVersion1)
-	apiV1.RegisterRoutes(c.userHandler.Routes()...)
-	c.server.RegisterAPIRouters(apiV1)
-	c.server.RegisterSwagger()
+	c.server = c.getHTTPServer()
 }
