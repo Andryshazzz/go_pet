@@ -13,16 +13,6 @@ func (e AppError) Error() string {
 	return e.Message
 }
 
-// Is allows errors.Is to compare AppError by Code.
-// This makes AppError work correctly with errors.Is().
-func (e AppError) Is(target error) bool {
-	t, ok := target.(AppError)
-	if !ok {
-		return false
-	}
-	return e.Code == t.Code
-}
-
 // Common application errors used across all layers.
 var (
 	// ErrNotFoundUser indicates that the requested user does not exist.
