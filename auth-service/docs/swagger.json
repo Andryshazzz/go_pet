@@ -43,25 +43,25 @@
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid credentials",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     }
                 }
@@ -101,19 +101,19 @@
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid or expired refresh token",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     }
                 }
@@ -153,19 +153,19 @@
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "409": {
                         "description": "Phone already registered",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse"
+                            "$ref": "#/definitions/github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse"
                         }
                     }
                 }
@@ -173,7 +173,7 @@
         }
     },
     "definitions": {
-        "github_com_Andryshazzz_go_pet_internal_core_transport_http_response.ErrorsResponse": {
+        "github_com_Andryshazzz_go_pet_pkg_httpserver_response.ErrorsResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -182,20 +182,6 @@
                 },
                 "message": {
                     "description": "Message contains the human-readable error description.",
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse": {
-            "type": "object",
-            "properties": {
-                "full_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "phone_number": {
                     "type": "string"
                 }
             }
@@ -234,7 +220,7 @@
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/github_com_Andryshazzz_go_pet_internal_features_auth_service.UserResponse"
+                    "$ref": "#/definitions/internal_features_auth_transport_http.UserDTO"
                 }
             }
         },
@@ -305,11 +291,11 @@
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/internal_features_auth_transport_http.UserResponse"
+                    "$ref": "#/definitions/internal_features_auth_transport_http.UserDTO"
                 }
             }
         },
-        "internal_features_auth_transport_http.UserResponse": {
+        "internal_features_auth_transport_http.UserDTO": {
             "type": "object",
             "properties": {
                 "full_name": {
