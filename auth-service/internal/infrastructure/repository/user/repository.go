@@ -33,9 +33,6 @@ func (r *UsersRepository) CreateUser(
 	ctx context.Context,
 	user entity.User,
 ) (entity.User, error) {
-	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
-	defer cancel()
-
 	query := `
 		INSERT INTO users (phone_number, password_hash, full_name)
 		VALUES ($1, $2, $3)
@@ -72,9 +69,6 @@ func (r *UsersRepository) FindByPhone(
 	ctx context.Context,
 	phone string,
 ) (*entity.User, error) {
-	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
-	defer cancel()
-
 	query := `
 		SELECT id, phone_number, password_hash, full_name
 		FROM users
@@ -95,6 +89,6 @@ func (r *UsersRepository) FindByPhone(
 		}
 		return nil, fmt.Errorf("Find user by phone: %w", err)
 	}
-	
+
 	return &output, nil
 }
