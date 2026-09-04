@@ -24,9 +24,9 @@ type JWTService struct {
 
 // TokenPair contains access and refresh tokens.
 type TokenPair struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int64  `json:"expires_in"`
+	AccessToken     string `json:"access_token"`
+	RefreshToken    string `json:"refresh_token"`
+	AccessExpiresIn int64  `json:"access_expires_in"`
 }
 
 // NewJWTService creates a new JWTService.
@@ -51,9 +51,9 @@ func (s *JWTService) GenerateTokenPair(claims jwt.Claims) (*TokenPair, error) {
 	}
 
 	return &TokenPair{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		ExpiresIn:    int64(s.accessExpiration.Seconds()),
+		AccessToken:     accessToken,
+		RefreshToken:    refreshToken,
+		AccessExpiresIn: int64(s.accessExpiration.Seconds()),
 	}, nil
 }
 

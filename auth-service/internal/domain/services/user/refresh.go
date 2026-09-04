@@ -5,11 +5,13 @@ import (
 	"fmt"
 
 	"github.com/Andryshazzz/go_pet/internal/domain/entity"
+	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
 	jwtpkg "github.com/Andryshazzz/go_pet/pkg/jwt"
 )
 
 // RefreshTokenRequest contains the refresh token for obtaining new tokens.
 type RefreshTokenRequest struct {
+	AccessToken  string
 	RefreshToken string
 }
 
@@ -23,14 +25,25 @@ func (s *UsersService) RefreshToken(
 	ctx context.Context,
 	req RefreshTokenRequest,
 ) (*RefreshTokenResponse, error) {
-	claims := &entity.Claims{}
+	accessClaims := &entity.Claims{}
 	
-	err := s.jwtService.ValidateToken(req.RefreshToken, claims)
-	if err != nil {
-		return nil, fmt.Errorf("invalid refresh token: %w", err)
+	errAccessToken := s.jwtService.ValidateToken(req.AccessToken, accessClaims)
+	if errAccessToken != nil {
+		return nil, fmt.Errorf("invalid access token: %w", apperrors.ErrInvalidToken)
 	}
 
-	tokenPair, err := s.jwtService.GenerateTokenPair(claims)
+	refreshClaims := &entity.Claims{}
+
+	errRefreshToken := s.jwtService.ValidateToken(req.RefreshToken, refreshClaims)
+	if errRefreshToken != nil {
+		return nil, fmt.Errorf("invalid refresh token: %w", apperrors.ErrInvalidToken)
+	}
+
+	if accessClaims.UserID != refreshClaims.UserID {
+		return nil, fmt.Errorf("access and refresh token mismatch: %w", apperrors.ErrInvalidToken)
+	}
+
+	tokenPair, err := s.jwtService.GenerateTokenPair(refreshClaims)
 	if err != nil {
 		return nil, fmt.Errorf("generate new tokens: %w", err)
 	}

@@ -8,7 +8,8 @@ type LoginRequest struct {
 
 // RefreshTokenRequest represents the JSON body for token refresh.
 type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token" validate:"required" example:"eyJhbGciOiJIUzI1NiIs..."`
+	AccessToken  string `json:"access_token"  validate:"required" example:"eyJhbG..."`
+	RefreshToken string `json:"refresh_token" validate:"required" example:"eyJhbG..."`
 }
 
 // RegisterRequest represents the JSON body for user registration.

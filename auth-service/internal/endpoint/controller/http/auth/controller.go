@@ -91,14 +91,14 @@ func (h *UsersHTTPHandler) register(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	response := dto.RegisterResponse{
-		User: dto.UserDTO{
+		User: dto.PrivateUserDTO{
 			ID:          result.User.ID,
 			PhoneNumber: result.User.PhoneNumber,
 			FullName:    result.User.FullName,
 		},
-		AccessToken:  result.TokenPair.AccessToken,
-		RefreshToken: result.TokenPair.RefreshToken,
-		ExpiresIn:    result.TokenPair.ExpiresIn,
+		AccessToken:     result.TokenPair.AccessToken,
+		RefreshToken:    result.TokenPair.RefreshToken,
+		AccessExpiresIn: result.TokenPair.AccessExpiresIn,
 	}
 
 	responseHandler.JSONResponse(response, http.StatusCreated)
@@ -139,14 +139,14 @@ func (h *UsersHTTPHandler) login(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	response := dto.LoginResponse{
-		User: dto.UserDTO{
+		User: dto.PrivateUserDTO{
 			ID:          result.User.ID,
 			PhoneNumber: result.User.PhoneNumber,
 			FullName:    result.User.FullName,
 		},
-		AccessToken:  result.TokenPair.AccessToken,
-		RefreshToken: result.TokenPair.RefreshToken,
-		ExpiresIn:    result.TokenPair.ExpiresIn,
+		AccessToken:     result.TokenPair.AccessToken,
+		RefreshToken:    result.TokenPair.RefreshToken,
+		AccessExpiresIn: result.TokenPair.AccessExpiresIn,
 	}
 
 	responseHandler.JSONResponse(response, http.StatusOK)
@@ -177,6 +177,7 @@ func (h *UsersHTTPHandler) refreshToken(rw http.ResponseWriter, r *http.Request)
 	}
 
 	result, err := h.usersService.RefreshToken(ctx, usersservice.RefreshTokenRequest{
+		AccessToken:  request.AccessToken,
 		RefreshToken: request.RefreshToken,
 	})
 	if err != nil {
@@ -185,9 +186,9 @@ func (h *UsersHTTPHandler) refreshToken(rw http.ResponseWriter, r *http.Request)
 	}
 
 	response := dto.RefreshTokenResponse{
-		AccessToken:  result.TokenPair.AccessToken,
-		RefreshToken: result.TokenPair.RefreshToken,
-		ExpiresIn:    result.TokenPair.ExpiresIn,
+		AccessToken:     result.TokenPair.AccessToken,
+		RefreshToken:    result.TokenPair.RefreshToken,
+		AccessExpiresIn: result.TokenPair.AccessExpiresIn,
 	}
 
 	responseHandler.JSONResponse(response, http.StatusOK)

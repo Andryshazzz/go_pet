@@ -48,4 +48,21 @@ var (
 		Message:  "invalid phone number or password",
 		Details:  nil,
 	}
+
+	// ErrInvalidToken indicates that the JWT token is invalid, expired, or malformed.
+	ErrInvalidToken = AppError{
+		HTTPCode: 401,
+		Code:     "invalid_token",
+		Message:  "invalid or expired token",
+		Details:  nil,
+	}
+
+	// ErrTokenMismatch indicates that access and refresh tokens belong
+	// to different users.
+	ErrTokenMismatch = AppError{
+		HTTPCode: 401,
+		Code:     "token_mismatch",
+		Message:  "access and refresh token mismatch",
+		Details:  nil,
+	}
 )
