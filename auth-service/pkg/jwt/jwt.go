@@ -1,15 +1,14 @@
+// pkg/jwt/jwt.go
 package jwt
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // Config holds JWT service settings.
-// Values are passed from the application configuration.
 type Config struct {
 	Secret            string
 	AccessExpiration  time.Duration
@@ -21,13 +20,6 @@ type JWTService struct {
 	secret            string
 	accessExpiration  time.Duration
 	refreshExpiration time.Duration
-}
-
-// Claims represents the JWT claims for authenticated users.
-type Claims struct {
-	UserID      uuid.UUID `json:"user_id"`
-	PhoneNumber string    `json:"phone_number"`
-	jwt.RegisteredClaims
 }
 
 // TokenPair contains access and refresh tokens.
@@ -46,16 +38,16 @@ func NewJWTService(config Config) *JWTService {
 	}
 }
 
-// GenerateTokenPair creates both access and refresh tokens for a user.
-func (s *JWTService) GenerateTokenPair(userID uuid.UUID, phoneNumber string) (*TokenPair, error) {
-	accessToken, err := s.generateToken(userID, phoneNumber, s.accessExpiration)
+// GenerateTokenPair creates both access and refresh tokens.
+func (s *JWTService) GenerateTokenPair(claims jwt.Claims) (*TokenPair, error) {
+	accessToken, err := s.generateToken(claims)
 	if err != nil {
-		return nil, fmt.Errorf("Generate access token: %w", err)
+		return nil, fmt.Errorf("generate access token: %w", err)
 	}
 
-	refreshToken, err := s.generateToken(userID, phoneNumber, s.refreshExpiration)
+	refreshToken, err := s.generateToken(claims)
 	if err != nil {
-		return nil, fmt.Errorf("Generate refresh token: %w", err)
+		return nil, fmt.Errorf("generate refresh token: %w", err)
 	}
 
 	return &TokenPair{
@@ -66,38 +58,37 @@ func (s *JWTService) GenerateTokenPair(userID uuid.UUID, phoneNumber string) (*T
 }
 
 // ValidateToken parses and validates a JWT token string.
-// Returns the claims if the token is valid.
-func (s *JWTService) ValidateToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func (s *JWTService) ValidateToken(tokenString string, claims jwt.Claims) error {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(s.secret), nil
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Parse token: %w", err)
+		return fmt.Errorf("parse token: %w", err)
 	}
 
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("Invalid token")
+	if !token.Valid {
+		return fmt.Errorf("invalid token")
 	}
 
-	return claims, nil
+	return nil
+}
+
+// GetAccessExpiration returns the access token expiration duration.
+func (s *JWTService) GetAccessExpiration() time.Duration {
+	return s.accessExpiration
+}
+
+// GetRefreshExpiration returns the refresh token expiration duration.
+func (s *JWTService) GetRefreshExpiration() time.Duration {
+	return s.refreshExpiration
 }
 
 // generateToken creates a signed JWT token.
-func (s *JWTService) generateToken(userID uuid.UUID, phoneNumber string, expiration time.Duration) (string, error) {
-	claims := &Claims{
-		UserID:      userID,
-		PhoneNumber: phoneNumber,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
+func (s *JWTService) generateToken(claims jwt.Claims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(s.secret))

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	apperrors "github.com/Andryshazzz/go_pet/pkg/errors"
-	jwt "github.com/Andryshazzz/go_pet/pkg/jwt"
+	"github.com/Andryshazzz/go_pet/internal/domain/entity"
+	jwtpkg "github.com/Andryshazzz/go_pet/pkg/jwt"
 )
 
 // RefreshTokenRequest contains the refresh token for obtaining new tokens.
@@ -15,23 +15,24 @@ type RefreshTokenRequest struct {
 
 // RefreshTokenResponse contains the new token pair.
 type RefreshTokenResponse struct {
-	TokenPair *jwt.TokenPair
+	TokenPair *jwtpkg.TokenPair
 }
 
 // RefreshToken validates the refresh token and issues a new token pair.
-// The old refresh token becomes invalid (rotation for security).
 func (s *UsersService) RefreshToken(
 	ctx context.Context,
 	req RefreshTokenRequest,
 ) (*RefreshTokenResponse, error) {
-	claims, err := s.jwtService.ValidateToken(req.RefreshToken)
+	claims := &entity.Claims{}
+	
+	err := s.jwtService.ValidateToken(req.RefreshToken, claims)
 	if err != nil {
-		return nil, fmt.Errorf("Invalid refresh token: %w: %w", err, apperrors.ErrInvalidArgument)
+		return nil, fmt.Errorf("invalid refresh token: %w", err)
 	}
 
-	tokenPair, err := s.jwtService.GenerateTokenPair(claims.UserID, claims.PhoneNumber)
+	tokenPair, err := s.jwtService.GenerateTokenPair(claims)
 	if err != nil {
-		return nil, fmt.Errorf("Generate new tokens: %w", err)
+		return nil, fmt.Errorf("generate new tokens: %w", err)
 	}
 
 	return &RefreshTokenResponse{

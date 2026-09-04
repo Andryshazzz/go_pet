@@ -40,22 +40,23 @@ func (s *UsersService) Register(
 
 	passwordHash, err := HashPassword(req.Password)
 	if err != nil {
-		return nil, fmt.Errorf("Hash password: %w", err)
+		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
 	user := entity.NewUser(req.PhoneNumber, passwordHash, req.FullName)
 	if err := user.Validate(); err != nil {
-		return nil, fmt.Errorf("Validate user: %w", err)
+		return nil, fmt.Errorf("validate user: %w", err)
 	}
 
 	createdUser, err := s.usersRepository.CreateUser(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("Create user: %w", err)
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 
-	tokenPair, err := s.jwtService.GenerateTokenPair(createdUser.ID, createdUser.PhoneNumber)
+	claims := entity.NewClaims(createdUser.ID, createdUser.PhoneNumber, s.jwtService.GetAccessExpiration())
+	tokenPair, err := s.jwtService.GenerateTokenPair(claims)
 	if err != nil {
-		return nil, fmt.Errorf("Generate tokens: %w", err)
+		return nil, fmt.Errorf("generate tokens: %w", err)
 	}
 
 	return &RegisterUserResponse{
