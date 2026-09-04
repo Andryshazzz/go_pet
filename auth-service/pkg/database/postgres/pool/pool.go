@@ -18,6 +18,7 @@ type Config struct {
 	User     string
 	Password string
 	DB       string
+	SSLMode  string
 	Timeout  time.Duration
 }
 
@@ -98,12 +99,13 @@ func NewConnectionPool(
 	config Config,
 ) (*ConnectionPool, error) {
 	connectionString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		config.User,
 		config.Password,
 		config.Host,
 		config.Port,
 		config.DB,
+		config.SSLMode,
 	)
 
 	pgxconfig, err := pgxpool.ParseConfig(connectionString)

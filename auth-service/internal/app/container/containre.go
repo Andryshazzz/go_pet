@@ -79,6 +79,7 @@ func (c *Container) initDatabase(ctx context.Context) error {
 		User:     c.cfg.Postgres.User,
 		Password: c.cfg.Postgres.Password,
 		DB:       c.cfg.Postgres.DB,
+		SSLMode:  c.cfg.Postgres.SSLMode,
 		Timeout:  c.cfg.Postgres.Timeout,
 	})
 	if err != nil {

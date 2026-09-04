@@ -31,6 +31,7 @@ type PostgresConfig struct {
 	User     string        `yaml:"user" env:"POSTGRES_USER"`
 	Password string        `yaml:"password" env:"POSTGRES_PASSWORD"`
 	DB       string        `yaml:"db" env:"POSTGRES_DB"`
+	SSLMode  string        `yaml:"sslmode" env:"POSTGRES_SSLMODE"`
 	Timeout  time.Duration `yaml:"timeout" env:"POSTGRES_TIMEOUT"`
 }
 
