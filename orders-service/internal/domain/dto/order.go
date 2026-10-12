@@ -18,7 +18,7 @@ type OrderDTO struct {
 
 // OrderItemDTO represents a single item in the order.
 type OrderItemDTO struct {
-	Name     string  `json:"name"     validate:"required,min=1,max=255" example:"Pizza"`
-	Quantity int     `json:"quantity" validate:"required,min=1,max=1000" example:"2"`
-	Price    float64 `json:"price"    validate:"required,min=0"          example:"12.50"`
+	Name     string  `json:"name"     validate:"required,min=1,max=255"`
+	Quantity int     `json:"quantity" validate:"required,min=1,max=1000"`
+	Price    float64 `json:"price"    validate:"required,min=0"`
 }

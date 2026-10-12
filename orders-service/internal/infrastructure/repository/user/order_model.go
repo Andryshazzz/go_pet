@@ -18,7 +18,6 @@ import (
 //   - ID: unique identifier (UUID)
 //   - UserID: owner of the order
 //   - Status: current order status (pending, processing, completed, cancelled)
-//   - Items: list of order items stored as JSONB
 //   - TotalPrice: total price of the order
 //   - CreatedAt: creation timestamp
 //   - UpdatedAt: last modification timestamp
@@ -26,7 +25,6 @@ type OrderModel struct {
 	ID         uuid.UUID
 	UserID     uuid.UUID
 	Status     string
-	Items      []entity.OrderItem
 	TotalPrice float64
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
@@ -38,7 +36,6 @@ func (m OrderModel) toEntity() entity.Order {
 		ID:         m.ID,
 		UserID:     m.UserID,
 		Status:     entity.OrderStatus(m.Status),
-		Items:      m.Items,
 		TotalPrice: m.TotalPrice,
 		CreatedAt:  m.CreatedAt,
 		UpdatedAt:  m.UpdatedAt,
@@ -56,7 +53,6 @@ func scanOrder(s utils.Scanner) (entity.Order, error) {
 		&model.ID,
 		&model.UserID,
 		&model.Status,
-		&model.Items,
 		&model.TotalPrice,
 		&model.CreatedAt,
 		&model.UpdatedAt,
@@ -69,4 +65,18 @@ func scanOrder(s utils.Scanner) (entity.Order, error) {
 	}
 
 	return model.toEntity(), nil
+}
+
+// scanOrderItem reads a single order item from a scanner.
+func scanOrderItem(s utils.Scanner) (entity.OrderItem, error) {
+	var item entity.OrderItem
+	err := s.Scan(
+		&item.Name,
+		&item.Quantity,
+		&item.Price,
+	)
+	if err != nil {
+		return entity.OrderItem{}, fmt.Errorf("scan order item: %w", err)
+	}
+	return item, nil
 }

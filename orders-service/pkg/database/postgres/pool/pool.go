@@ -28,37 +28,22 @@ type Config struct {
 // All methods accept context for cancellation and timeouts.
 type Pool interface {
 	// Query executes a SELECT query and returns rows.
-	// The caller must close the returned rows.
-	//
-	// Usage:
-	//   rows, err := pool.Query(ctx, "SELECT id, name FROM users WHERE active = $1", true)
-	//   if err != nil { ... }
-	//   defer rows.Close()
-	//   for rows.Next() { ... }
 	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
 
 	// QueryRow executes a SELECT query expected to return at most one row.
-	//
-	// Usage:
-	//   var name string
-	//   err := pool.QueryRow(ctx, "SELECT name FROM users WHERE id = $1", userID).Scan(&name)
 	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 
 	// Exec executes a query that doesn't return rows (INSERT, UPDATE, DELETE).
-	//
-	// Usage:
-	//   tag, err := pool.Exec(ctx, "UPDATE users SET active = $1 WHERE id = $2", true, userID)
-	//   if tag.RowsAffected() == 0 { ... }
 	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
 
 	// Close releases all connections in the pool.
-	// Should be called once on application shutdown.
 	Close()
 
 	// OpTimeout returns the configured operation timeout.
-	// Repositories should use it to create contexts:
-	//   ctx, cancel := context.WithTimeout(ctx, pool.OpTimeout())
 	OpTimeout() time.Duration
+
+	// Start transaction.
+	Begin(ctx context.Context) (pgx.Tx, error)
 }
 
 // ConnectionPool wraps pgxpool.Pool with an operation timeout.

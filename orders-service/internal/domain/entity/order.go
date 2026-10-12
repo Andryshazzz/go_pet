@@ -21,21 +21,12 @@ const (
 
 // OrderItem represents a single item in the order.
 type OrderItem struct {
-	Name     string  `json:"name"`
-	Quantity int     `json:"quantity"`
-	Price    float64 `json:"price"`
+	Name     string
+	Quantity int
+	Price    float64
 }
 
 // Order represents a customer's order.
-//
-// Fields:
-//   - ID: unique identifier (UUID)
-//   - UserID: owner of the order (from JWT)
-//   - Status: current order status
-//   - Items: list of items in the order
-//   - TotalPrice: total price (calculated from items)
-//   - CreatedAt: when order was created
-//   - UpdatedAt: when order was last modified
 type Order struct {
 	ID         uuid.UUID
 	UserID     uuid.UUID
