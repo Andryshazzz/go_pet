@@ -1,0 +1,92 @@
+services:
+  deploy-app:
+    build:
+      context: ${ORDERS_SERVICE_ROOT}
+      dockerfile: ${ORDERS_SERVICE_ROOT}/Dockerfile
+    container_name: orders-service
+    env_file:
+      - .env.docker
+    environment:
+      - HTTP_ADDR=:5051
+      - POSTGRES_HOST=postgres-orders
+      - POSTGRES_PORT=5432
+      - KAFKA_BROKERS=kafka:29092
+    volumes:
+      - ${ORDERS_SERVICE_ROOT}/out/logs:/app/out/logs
+    ports:
+      - "5051:5051"
+    restart: unless-stopped
+
+  postgres-orders:
+    image: postgres:16-bookworm
+    container_name: orders-service-db
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env.docker
+    volumes:
+      - ${ORDERS_SERVICE_ROOT}/out/pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  postgres-migrate:
+    image: migrate/migrate:v4.19.1
+    volumes:
+      - ${ORDERS_SERVICE_ROOT}/migrations:/migrations
+
+  swagger:
+    build:
+      context: ${ORDERS_SERVICE_ROOT}
+      dockerfile_inline: |
+        FROM golang:1.26-alpine
+        RUN apk add --no-cache git
+        RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
+        WORKDIR /code
+        ENTRYPOINT ["swag"]
+    volumes:
+      - ${ORDERS_SERVICE_ROOT}:/code
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    container_name: orders-kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics --bootstrap-server localhost:29092 --list || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: orders-kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: ""
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  kafka_data:
